@@ -17,10 +17,11 @@ on:
 # There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
 jobs:
   ci:
-    
     permissions:
-      id-token: write
       contents: read
+      packages: write
+      attestations: write
+      id-token: write
     uses: ./.github/workflows/r-ci.yml
     with:
       isDev: true
