@@ -1,7 +1,8 @@
-name: Build and upload docker image of backend to GHCR 
+# This workflow is used to build and upload a docker image of the dev-backend to GHCR
+name: Backend-CI
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # temporary for testing, will be removed
   workflow_call:
 
 
