@@ -2,7 +2,7 @@
 # This workflow builds and pushes a Docker image for the backend service to GitHub Container Registry.
 # It runs on workflow dispatch or when called by another workflow.
 
-name: Backend-CI
+name: Backend-Dev-CI
 
 on:
   workflow_dispatch: # Allows manual triggering of the workflow, temporary exist for testing
