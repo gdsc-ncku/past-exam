@@ -13,23 +13,18 @@ on:
 # Configures this workflow to run every time a change is pushed to the branch called `release`.
 
 # Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/pastexam/backend
 
 # There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
 jobs:
-  dev-build-and-push-image:
-    runs-on: ubuntu-latest
-    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: run dev r-ci
-        uses: ./.github/workflows/r-ci.yml
-        with:
-          isDev: true
-          imageName: ${{ env.IMAGE_NAME }}
-          REGISTRY: ${{ env.REGISTRY }}
+  ci:
+    
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/r-ci.yml
+    with:
+      isDev: true
+      imageName: ${{ github.repository_owner }}/pastexam/backend
+      REGISTRY: ghcr.io
       
       
