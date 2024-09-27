@@ -48,7 +48,8 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64
+          tags:  ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev-latest
           labels: ${{ steps.meta.outputs.labels }}
       
       
