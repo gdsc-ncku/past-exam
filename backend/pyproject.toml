@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "backend"
+version = "0.0.0"
+description = ""
+authors = ["owenowenisme <mses010108@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.115.0"
+SQLAlchemy = "^2.0.35"
+pydantic = "^2.9.2"
+uvicorn = "^0.31.1"
+pydantic-settings = "^2.5.2"
+psycopg2 = "^2.9.9"
+ruff = "^0.6.9"
+pre-commit = "^4.0.1"
+
+[tool.poetry.scripts]
+lint = "ruff check ."
+format = "ruff format"
+start = "uvicorn main:app --reload"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100  
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  
+
+[tool.ruff.format]
+quote-style = "single"  
+skip-magic-trailing-comma = true
+
+[tool.ruff.isort]
+split-on-trailing-comma=false
