@@ -1,0 +1,6 @@
+.venv
+.vscode
+.DS_Store
+__pycache__
+db_data
+.ruff_cache
