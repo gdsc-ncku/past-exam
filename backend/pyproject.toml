@@ -16,12 +16,6 @@ psycopg2 = "^2.9.9"
 ruff = "^0.6.9"
 pre-commit = "^4.0.1"
 
-[tool.poetry.scripts]
-lint = "ruff check ."
-format = "ruff format"
-start = "uvicorn main:app --reload"
-
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -31,10 +25,10 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]  
+isort.split-on-trailing-comma=false
 
 [tool.ruff.format]
 quote-style = "single"  
 skip-magic-trailing-comma = true
 
-[tool.ruff.isort]
-split-on-trailing-comma=false
+
