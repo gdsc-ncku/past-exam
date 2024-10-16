@@ -13,7 +13,7 @@
     - [Pre-commit Hooks](#pre-commit-hooks)
 
 ## Prerequisites
-
+- Python>=3.9
 - Poetry [Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)
 - Docker and Docker Compose
 
