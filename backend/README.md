@@ -13,7 +13,7 @@
     - [Pre-commit Hooks](#pre-commit-hooks)
 
 ## Prerequisites
-- Python>=3.9
+- Python=3.11.10
 - Poetry [Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)
 - Docker and Docker Compose
 
@@ -37,18 +37,28 @@
    POSTGRES_DB=your_database_name
    POSTGRES_IP=localhost
    POSTGRES_PORT=5432 
-   MODE=dev
+   ```
+   also add `.env.dev`
+   ```
+   MINIO_ACCESS_KEY=your_minio_access_key
+   MINIO_SECRET_KEY=your_minio_secret_key
+   POSTGRES_USER=your_postgres_user
+   POSTGRES_PASSWORD=your_postgres_password
+   POSTGRES_DB=your_database_name
+   POSTGRES_IP=localhost
+   POSTGRES_PORT=5432 
+   MODE= dev
    ```
 
 ## Running the Application
 
 1. Start the PostgreSQL database using Docker Compose: (Assume that docker compose is installed)
 
-   ```docker-compose up -d```
+   ```docker compose up postgres -d ```
 
 2. Run the FastAPI application:
    ```
-   poetry run python3 main.py
+   poetry run python3 main.py --mode dev
    ```
 
    The application will be available at `http://localhost:8000`.

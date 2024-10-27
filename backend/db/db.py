@@ -6,19 +6,6 @@ from core.config import get_settings
 from models.file import File
 from models.user import User
 
-DATABASE_URL = URL.create(
-    'postgresql',
-    username=get_settings().postgres_user,
-    password=get_settings().postgres_password,
-    host=get_settings().postgres_ip,
-    port=get_settings().postgres_port,
-    database=get_settings().postgres_db,
-)
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
 
 def get_db():
     db = SessionLocal()
@@ -26,4 +13,17 @@ def get_db():
 
 
 def init_db():
+    settings = get_settings()
+    DATABASE_URL = URL.create(
+        'postgresql',
+        username=settings.postgres_user,
+        password=settings.postgres_password,
+        host=settings.postgres_ip,
+        port=settings.postgres_port,
+        database=settings.postgres_db,
+    )
+    engine = create_engine(DATABASE_URL)
+    global SessionLocal
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base = declarative_base()
     Base.metadata.create_all(bind=engine, tables=[User.__table__, File.__table__])
