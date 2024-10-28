@@ -1,0 +1,35 @@
+name: Trigger backend cd workflow (for dev)
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+        runner-tag:
+            type: string
+            description: The tag of the runner to use
+        docker-image-tag:
+            type: string
+            description: The tag of the docker image to use
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/pastexam/backend
+
+# There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
+jobs:
+  trigger-backend-cd:
+    runs-on: |
+      self-hosted-runner
+      ${{ inputs.runner-tag }}
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+      - name: Pull the docker image
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.docker-image-tag }}
+      - name: stop the original container
+        run: |
+          docker stop pastexam-backend
+      - name: run the new container
+        run: |
+          docker run -d --name pastexam-backend --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ inputs.docker-image-tag }}
