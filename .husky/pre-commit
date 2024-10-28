@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+declare IS_FRONTEND_FOLDER_CHANGE=$(git show --name-only -r --stat --oneline HEAD~..HEAD | grep 'frontend/')
+
+
+echo "trigger pre-commit"
+cd frontend/ && pnpm lint-staged
