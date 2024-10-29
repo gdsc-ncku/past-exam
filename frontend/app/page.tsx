@@ -6,7 +6,7 @@ export default function Page() {
     <div className="space-y-8">
       <h1 className="text-xl font-medium text-gray-300">Examples</h1>
 
-      <div className="space-y-10 bg-cyan-700 text-white">
+      <div className="space-y-10 rounded-2xl bg-cyan-700 text-white">
         <FileUploadField />
       </div>
       <div className="space-y-10 bg-red-700 text-white">
