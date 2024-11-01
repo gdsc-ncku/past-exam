@@ -7,7 +7,7 @@ interface FileWithPreview extends File {
   preview: string;
 }
 
-export const FileUploadField: React.FC = () => {
+export const FileUploadField = () => {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -24,15 +24,22 @@ export const FileUploadField: React.FC = () => {
     multiple: true,
   });
 
-  const removeFile = (fileName: string) => {
+  const removeFile = (fileName: string): void => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes >= 1024 * 1024) {
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+    return `${(bytes / 1024).toFixed(2)} KB`;
   };
 
   return (
     <>
       <div
         {...getRootProps()}
-        className="relative h-[50vh] cursor-pointer gap-y-4  rounded-2xl border-2 border-dotted border-gray-400 p-1 text-center transition-all duration-200 hover:bg-cyan-600 "
+        className="relative h-[50vh] cursor-pointer gap-y-4 rounded-2xl border-2 border-dotted border-gray-400 p-1 text-center transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 hover:bg-cyan-600"
       >
         <div className="flex h-full w-full flex-col justify-center rounded-xl border-2 border-dotted p-5">
           <input {...getInputProps()} />
@@ -45,35 +52,34 @@ export const FileUploadField: React.FC = () => {
           </button>
         </div>
       </div>
-      {files.length != 0 && (
-        <div className="mt-2 flex pb-4 ">
+      {files.length !== 0 && (
+        <div className="mt-4">
           <h3 className="font-semibold">Selected Files</h3>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-2 space-y-4">
             {files.map((file, index) => (
               <li
                 key={index}
                 className="flex items-center justify-between rounded-xl border border-gray-300 p-2"
               >
                 <div className="flex items-center space-x-4">
-                  <Image
-                    src={file.preview}
-                    alt={file.name}
-                    className="h-12 w-12 rounded object-cover"
-                  />
+                  <div className="relative h-12 w-12 overflow-hidden rounded sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24">
+                    <Image
+                      src={file.preview}
+                      alt={file.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                   <div>
                     <p className="font-medium">{file.name}</p>
-                    <p className="mb-4 text-sm text-slate-50">
-                      {`${file.name.split('.')[1]} - ${
-                        file.size >= 1024 * 1024
-                          ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
-                          : `${(file.size / 1024).toFixed(2)} KB`
-                      }`}
+                    <p className="text-sm text-slate-50">
+                      {`${file.name.split('.')[1]} - ${formatFileSize(file.size)}`}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => removeFile(file.name)}
-                  className="rounded-lg bg-red-500 px-2 py-1 hover:bg-red-600"
+                  className="rounded-lg bg-red-500 px-2 py-1 text-white hover:bg-red-600"
                 >
                   Remove
                 </button>
@@ -85,9 +91,3 @@ export const FileUploadField: React.FC = () => {
     </>
   );
 };
-
-// What you need to do:
-// 1. Add a file input and a button to upload the file
-// 2. allow file dropping
-// 3. Show the file's properties (name, size, type)
-// 4. Style the file upload field whatever you want with tailwind
