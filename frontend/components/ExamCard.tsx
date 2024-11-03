@@ -15,7 +15,6 @@ export const ExamCard = () => {
     } else {
       setCurrentIndex(0);
     }
-    console.log(currentIndex);
   };
 
   const handlePrevious = () => {
@@ -24,7 +23,6 @@ export const ExamCard = () => {
     } else {
       setCurrentIndex(dummyFiles.length - 1);
     }
-    console.log(currentIndex);
   };
 
   const toggleList = () => {
@@ -44,6 +42,17 @@ export const ExamCard = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleString('zh-TW', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const file = dummyFiles[currentIndex];
@@ -66,14 +75,7 @@ export const ExamCard = () => {
               <p>Uploader: {file.uploader}</p>
               <p>
                 Uploaded Time:{'  '}
-                {file.uploadedTime.toLocaleString('zh-TW', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  weekday: 'long',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {formatDate(file.uploadedTime)}
               </p>
               <p>Downloads: {file.downloads}</p>
               <button
@@ -104,26 +106,19 @@ export const ExamCard = () => {
         <ul className="text-black">
           {dummyFiles.map((file) => (
             <li className="card" key={file.filename}>
-              <p>File： {file.filename}</p>
+              <p>Filename: {file.filename}</p>
               <p>
                 Uploaded Time:{'  '}
-                {file.uploadedTime.toLocaleString('zh-TW', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  weekday: 'long',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {formatDate(file.uploadedTime)}
               </p>
-              <p>uploader： {file.uploader}</p>
+              <p>uploader: {file.uploader}</p>
               <button
                 className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                 onClick={() => Download(file.fileLocation, file.filename)}
               >
                 Download
               </button>
-              <br />
+              <div className="mb-4" />
             </li>
           ))}
         </ul>
