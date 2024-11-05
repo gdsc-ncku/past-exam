@@ -1,0 +1,25 @@
+.card {
+  @apply bg-custom-gray mt-5 rounded-lg p-5 shadow-md;
+}
+
+.card p {
+  @apply text-black;
+}
+
+.card h3 {
+  @apply text-lg font-bold text-black;
+  font-family: sans-serif;
+}
+
+/* 按鈕樣式 */
+.toggle {
+  @apply rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-700;
+}
+
+.button-secondary {
+  @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700;
+}
+
+.button-switch {
+  @apply rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-700;
+}

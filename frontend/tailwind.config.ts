@@ -16,6 +16,7 @@ export default {
     extend: {
       // https://vercel.com/design/color
       colors: {
+        'custom-gray': '#f0f4f8',
         gray: colors.zinc,
         'gray-1000': 'rgb(17,17,19)',
         'gray-1100': 'rgb(10,10,11)',
