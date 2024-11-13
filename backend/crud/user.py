@@ -1,19 +1,17 @@
-from db.db import get_db
+from sqlalchemy.orm import Session
+
 from models.user import User
 from schemas.user import User as UserSchema
 
 
 class UserCRUD:
-    def create_user(user: UserSchema):
-        db = get_db()
+    def create_user(self, db: Session, user: UserSchema):
         db_user = User(username=user.username, password=user.password, email=user.email)
         db.add(db_user)
         db.commit()
-        db.close()
-        return {'status': 'success'}
+        db.refresh(db_user)
+        return {'data': db_user}
 
-    def read_all_user():
-        db = get_db()
+    def read_all_user(self, db: Session):
         users = db.query(User).all()
-        db.close()
-        return {'status': 'success', 'users': users}
+        return {'data': users}

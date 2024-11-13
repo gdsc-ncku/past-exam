@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class User(Base):
-    __tablename__ = 'Users'
+    __tablename__ = 'users'
     userId: Mapped[BaseModel.int_primary_key]
     username: Mapped[BaseModel.str_base]
     password: Mapped[BaseModel.str_base]
