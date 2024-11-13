@@ -1,7 +1,7 @@
 from typing import Generator
+
 from sqlalchemy import URL, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from core.config import get_settings
 from models.file import File
@@ -28,6 +28,7 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine, tables=[User.__table__, File.__table__])
