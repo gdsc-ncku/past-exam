@@ -1,5 +1,5 @@
 import { FileUploadField } from '@/components/FileUploadField';
-import { ExamCard } from '@/components/ExamCard/ExamCard';
+import { ExamCard } from '@/components/ExamCard';
 
 export default function Page() {
   return (
