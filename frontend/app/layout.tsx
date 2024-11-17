@@ -1,6 +1,6 @@
 import '@/styles/globals.css';
 import { Metadata } from 'next';
-import { GlobalNav } from '@/components/GlobalNav';
+import { GlobalNav } from '@/components/GlobalNav/GlobalNav';
 export default function RootLayout({
   children,
 }: {
