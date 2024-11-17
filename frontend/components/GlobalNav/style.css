@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .nav-link {
+    @apply hover:bg-white hover:text-blue-400 transition-colors duration-200;
+  }
+}
