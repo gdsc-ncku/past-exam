@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { LinkItem } from './Link';
+import { navLinks } from './Link';
+import Image from 'next/image';
 
 export const GlobalNav = () => {
   return (
@@ -7,10 +8,12 @@ export const GlobalNav = () => {
       <div className="flex items-center w-full px-4 py-4">
         {/* Left Section - Logo and Search */}
         <div className="flex items-center space-x-4">
-            <img 
-              src="frontend/public/nextjs-icon-light-background.png" 
+            <Image 
+              src="/nextjs-icon-light-background.png" 
               className="h-10 w-auto rounded-full shadow-md" 
-              alt="Logo" 
+              alt="Logo"
+              width = {40} 
+              height = {40}
             />
             <input 
               type="text" 
@@ -21,13 +24,13 @@ export const GlobalNav = () => {
 
         {/* Right Section - Links */}
         <div className="flex items-center space-x-8 text-white">
-          {LinkItem.map((link) => (
+          {navLinks.map(({ href, label }) => (
             <Link 
-              key={link.href}
-              href={link.href} 
+              key={href}
+              href={href} 
               className="nav-link"
             >
-              {link.label}
+              {label}
             </Link>
           ))}
         </div>
