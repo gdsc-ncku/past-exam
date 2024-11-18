@@ -58,6 +58,8 @@ class CommentCRUD:
         try:
             db = get_db()
             comment = db.query(Comment).filter(Comment.comment_id == comment_id).first()
+            if comment is None:
+                raise Exception(f"comment ID {comment_id} doesn't exist")
             db.delete(comment)
             db.commit()
             db.close()

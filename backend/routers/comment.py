@@ -133,8 +133,6 @@ async def delete_comment_by_id(comment_id: int):
                 comment_id=comment.comment_id,
             )
             return CommentResponseModel(status='success', message=None, data=data)
-        else:
-            raise Exception(f"comment ID {comment_id} doesn't exist")
         # database exception or no-id exception
 
     except Exception as e:
