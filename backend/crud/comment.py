@@ -34,7 +34,7 @@ class CommentCRUD:
         except Exception as e:
             db.rollback()
             db.close()
-            raise Exception(f'An error occurred: {str(e)}')
+            raise e
 
     @staticmethod
     def read_comment_by_commenter(commenter_id: str):
@@ -51,22 +51,18 @@ class CommentCRUD:
         except Exception as e:
             db.rollback()
             db.close()
-            raise Exception(f'An error occurred: {str(e)}')
+            raise e
 
     @staticmethod
     def delete_comment_by_id(comment_id: int):
         try:
             db = get_db()
             comment = db.query(Comment).filter(Comment.comment_id == comment_id).first()
-            if comment:
-                db.delete(comment)
-                db.commit()
-                db.close()
-                return comment
-            else:
-                db.close()
-                return comment
+            db.delete(comment)
+            db.commit()
+            db.close()
+            return comment
         except Exception as e:
             db.rollback()
             db.close()
-            return {'status': 'error', 'message': str(e)}
+            raise e
