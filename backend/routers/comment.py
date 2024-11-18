@@ -9,7 +9,7 @@ router = APIRouter(tags=['comment'], prefix='/comment')
 
 
 @router.post(
-    '/',
+    '',
     response_model=CommentResponse,
     status_code=status.HTTP_201_CREATED,
     response_description='Create a new comment',
@@ -27,7 +27,7 @@ async def create_comment(comment: CommentCreate):
         raise HTTPException(status_code=500, detail=f'An error occurred: {str(e)}')
 
 
-@router.get('/', response_model=List[CommentResponse], status_code=status.HTTP_200_OK)
+@router.get('', response_model=List[CommentResponse], status_code=status.HTTP_200_OK)
 async def read_all_comment():
     comments = CommentCRUD.read_all_comment()
     if comments:
