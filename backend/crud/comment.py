@@ -10,16 +10,19 @@ class CommentCRUD:
     def create_comment(comment: CommentCreate):
         try:
             db = get_db()
-            db_comment = Comment(commenter_id=comment.commenter_id, content=comment.content)
-            db.add(db_comment)
-            db.commit()
-            db.refresh(db_comment)
-            db.close()
-            return db_comment
+            if comment.commenter_id != '' and comment.content != '':
+                db_comment = Comment(commenter_id=comment.commenter_id, content=comment.content)
+                db.add(db_comment)
+                db.commit()
+                db.refresh(db_comment)
+                db.close()
+                return db_comment
+            else:
+                raise Exception('Neither commenter nor content cannot be EMPTY!')
         except Exception as e:
             db.rollback()
             db.close()
-            raise Exception(f'An error occurred: {str(e)}')
+            raise e
 
     @staticmethod
     def read_all_comment():
