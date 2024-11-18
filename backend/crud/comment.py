@@ -18,7 +18,7 @@ class CommentCRUD:
                 db.close()
                 return db_comment
             else:
-                raise Exception('Neither commenter nor content cannot be EMPTY!')
+                raise Exception('Neither commenter nor content can be EMPTY!')
         except Exception as e:
             db.rollback()
             db.close()
