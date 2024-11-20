@@ -3,8 +3,14 @@ export interface NavLink {
   label: string;
 }
 
+export const ROUTES = {
+  FILES: '/files',
+  UPLOAD: '/upload',
+  SEARCH: '/search',
+} as const;
+
 export const navLinks: NavLink[] = [
-  { href: '/files', label: 'Files' },
-  { href: '/upload', label: 'Upload' },
-  { href: '/search', label: 'Search' },
+  { href: ROUTES.FILES, label: 'Files' },
+  { href: ROUTES.SEARCH, label: 'Upload' },
+  { href: ROUTES.UPLOAD, label: 'Search' },
 ];
