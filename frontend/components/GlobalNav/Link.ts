@@ -11,6 +11,6 @@ export const ROUTES = {
 
 export const navLinks: NavLink[] = [
   { href: ROUTES.FILES, label: 'Files' },
-  { href: ROUTES.SEARCH, label: 'Upload' },
-  { href: ROUTES.UPLOAD, label: 'Search' },
+  { href: ROUTES.UPLOAD, label: 'Upload' },
+  { href: ROUTES.SEARCH, label: 'Search' },
 ];
