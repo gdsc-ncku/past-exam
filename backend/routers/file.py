@@ -21,8 +21,8 @@ async def read_all_file(db: Session = Depends(get_db)):
 @router.post('', response_model=ResponseModel[FileResponseSchema])
 async def create_file(
     upload_file: UploadFile = File(...),
-    file_name: str = Form(None),
-    uploader_id: int = Form(None),
+    file_name: str = Form(...),
+    uploader_id: int = Form(...),
     db: Session = Depends(get_db)
 ):
     file_data = FileCreateSchema(
