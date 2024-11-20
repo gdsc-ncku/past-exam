@@ -1,13 +1,17 @@
 from datetime import datetime
-from typing import Generic, Literal, Optional, TypeVar
+from enum import Enum
+from typing import Generic, Optional, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 T = TypeVar('T')
 
+class ResponseStatus(Enum):
+    SUCCESS = "success"
+    ERROR = "error"
 
 class ResponseModel(BaseModel, Generic[T]):
-    status: Literal['success', 'error']
+    status: ResponseStatus
     message: Optional[str] = None
     data: Optional[T] = None
-    timestamp: datetime = datetime.now()
+    timestamp: datetime = Field(default_factory=datetime.now)

@@ -17,7 +17,7 @@ class File(Base):
     file_location: Mapped[BaseModel.str_base]
     timestamp: Mapped[BaseModel.timestamp]
     uploader: Mapped['User'] = relationship('User', back_populates='files')
-    uploader_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.userId'))
+    uploader_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.user_id'))
 
     def __init__(self, filename: str, file_location: str, uploader_id: int):
         self.filename = filename

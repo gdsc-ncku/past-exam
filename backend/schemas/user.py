@@ -1,7 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
-class User(BaseModel):
-    username: str  # The name of the file
+class UserBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    username: str
+    email: EmailStr
+
+
+class UserCreate(UserBase):
     password: str
-    email: str
+
+
+class UserResponse(UserBase):
+    user_id: int
