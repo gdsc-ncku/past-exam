@@ -5,9 +5,9 @@ import Image from 'next/image';
 export const GlobalNav = () => {
   return (
     <div className="fixed top-0 z-10 w-full border-b border-gray-800 bg-gray-300 lg:w-full lg:border-b-0 lg:border-r lg:border-gray-800">
-      <div className="flex items-center w-full px-4 py-4">
+      <div className="flex items-center w-full px-4 py-4 space-x-8">
         {/* Left Section - Logo and Search */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-4">
             <Image 
               src="/nextjs-icon-light-background.png" 
               className="h-10 rounded-full shadow-md" 
@@ -18,17 +18,17 @@ export const GlobalNav = () => {
             <input 
               type="text" 
               placeholder="Search" 
-              className="px-4 py-2 text-sm bg-gray-400 border border-gray-600 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 text-sm bg-gray-200 border border-gray-600 rounded-full text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
         </div>
 
         {/* Right Section - Links */}
-        <div className="flex items-center text-white">
+        <div className="flex items-center text-gray-700 space-x-5">
           {navLinks.map(({ href, label }) => (
             <Link 
               key={href}
               href={href} 
-              className="nav-link"
+              className="hover: hover:text-blue-400 focus:text-zinc-500 focus:outline-none transition-colors duration-200"
             >
               {label}
             </Link>
