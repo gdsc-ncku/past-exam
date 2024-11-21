@@ -28,7 +28,7 @@ export const GlobalNav = () => {
             <Link 
               key={href}
               href={href} 
-              className="hover: hover:text-blue-400 focus:text-zinc-500 focus:outline-none transition-colors duration-200"
+              className="hover:text-blue-400 focus:text-zinc-500 focus:outline-none transition-colors duration-200"
             >
               {label}
             </Link>
