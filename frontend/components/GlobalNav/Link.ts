@@ -4,13 +4,13 @@ export interface NavLink {
 }
 
 export const ROUTES = {
-  FILES: '/files',
-  UPLOAD: '/upload',
-  SEARCH: '/search',
+  files: '/files',
+  upload: '/upload',
+  search: '/search',
 } as const;
 
 export const navLinks: NavLink[] = [
-  { href: ROUTES.FILES, label: 'Files' },
-  { href: ROUTES.UPLOAD, label: 'Upload' },
-  { href: ROUTES.SEARCH, label: 'Search' },
+  { href: ROUTES.files, label: 'Files' },
+  { href: ROUTES.upload, label: 'Upload' },
+  { href: ROUTES.search, label: 'Search' },
 ];
