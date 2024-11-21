@@ -1,9 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer components {
-  .nav-link {
-    @apply hover: hover:text-blue-400 focus:text-zinc-500 focus:outline-none transition-colors duration-200;
-  }
-}
