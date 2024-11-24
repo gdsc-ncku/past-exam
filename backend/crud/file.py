@@ -44,6 +44,8 @@ class FileCRUD:
                         status_code=404, detail=f'User with id {file_data.uploader_id} not found'
                     )
             
+            # TODO: File storage approach is still TBD
+
             os.makedirs(self.UPLOAD_DIR, exist_ok=True)
 
             file_extension = os.path.splitext(upload_file.filename)[1].lower()
