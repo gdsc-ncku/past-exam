@@ -11,15 +11,17 @@ if TYPE_CHECKING:
 
 
 class File(Base):
-    __tablename__ = 'Files'
-    fileId: Mapped[BaseModel.int_primary_key]
+    __tablename__ = 'files'
+    file_id: Mapped[BaseModel.int_primary_key]
     filename: Mapped[BaseModel.str_base]
+    file_location: Mapped[BaseModel.str_base]
     timestamp: Mapped[BaseModel.timestamp]
-    uploader: Mapped['User'] = relationship('User', back_populates='files')  # type: ignore
-    uploader_id: Mapped[int] = mapped_column(Integer, ForeignKey('Users.userId'))
+    uploader: Mapped['User'] = relationship('User', back_populates='files')
+    uploader_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.user_id'))
 
-    def __init__(self, filename: str, uploader_id: int):
+    def __init__(self, filename: str, file_location: str, uploader_id: int):
         self.filename = filename
+        self.file_location = file_location
         self.uploader_id = uploader_id
         self.timestamp = datetime.now()
 

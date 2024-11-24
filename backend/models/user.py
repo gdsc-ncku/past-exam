@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from pydantic import EmailStr
 from sqlalchemy.orm import Mapped, relationship
 
 from .base import Base, BaseModel
@@ -10,8 +11,8 @@ if TYPE_CHECKING:
 
 
 class User(Base):
-    __tablename__ = 'Users'
-    userId: Mapped[BaseModel.int_primary_key]
+    __tablename__ = 'users'
+    user_id: Mapped[BaseModel.int_primary_key]
     username: Mapped[BaseModel.str_base]
     password: Mapped[BaseModel.str_base]
     email: Mapped[BaseModel.str_base]
@@ -24,7 +25,7 @@ class User(Base):
         order_by='File.filename',
     )
 
-    def __init__(self, username: str, password: str, email: str):
+    def __init__(self, username: str, password: str, email: EmailStr):
         self.username = username
         self.password = password
         self.email = email
