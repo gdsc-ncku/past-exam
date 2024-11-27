@@ -21,8 +21,7 @@ class FileCRUD:
         if upload_file.size > self.MAX_FILE_SIZE:
             max_size_mb = self.MAX_FILE_SIZE / 1024 / 1024
             raise HTTPException(
-                status_code=400,
-                detail=f'File size exceeds the maximum limit of {max_size_mb} MB.'
+                status_code=400, detail=f'File size exceeds the maximum limit of {max_size_mb} MB.'
             )
 
         ext = os.path.splitext(upload_file.filename)[1].lower()
@@ -30,10 +29,7 @@ class FileCRUD:
             raise HTTPException(status_code=400, detail='File extension not allowed.')
 
     async def create_file(
-        self,
-        db: Session,
-        file_data: FileCreateSchema,
-        upload_file: UploadFile
+        self, db: Session, file_data: FileCreateSchema, upload_file: UploadFile
     ) -> ResponseModel[FileResponseSchema]:
         try:
             self._validate_file(upload_file)
@@ -43,7 +39,7 @@ class FileCRUD:
                     raise HTTPException(
                         status_code=404, detail=f'User with id {file_data.uploader_id} not found'
                     )
-            
+
             # TODO: File storage approach is still TBD
 
             os.makedirs(self.UPLOAD_DIR, exist_ok=True)
@@ -69,8 +65,7 @@ class FileCRUD:
             db.refresh(db_file)
 
             return ResponseModel(
-                status=ResponseStatus.SUCCESS,
-                data=FileResponseSchema.model_validate(db_file)
+                status=ResponseStatus.SUCCESS, data=FileResponseSchema.model_validate(db_file)
             )
 
         except HTTPException:
@@ -85,7 +80,7 @@ class FileCRUD:
             files = db.query(File).all()
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
-                data=[FileResponseSchema.model_validate(file) for file in files]
+                data=[FileResponseSchema.model_validate(file) for file in files],
             )
 
         except Exception:
@@ -97,8 +92,7 @@ class FileCRUD:
             raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
 
         return ResponseModel(
-            status=ResponseStatus.SUCCESS,
-            data=FileResponseSchema.model_validate(file)
+            status=ResponseStatus.SUCCESS, data=FileResponseSchema.model_validate(file)
         )
 
     def delete_file(self, db: Session, file_id: int) -> ResponseModel[None]:
@@ -118,7 +112,7 @@ class FileCRUD:
 
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
-                message=f'File with id {file_id} deleted successfully'
+                message=f'File with id {file_id} deleted successfully',
             )
 
         except HTTPException:

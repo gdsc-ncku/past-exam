@@ -1,8 +1,8 @@
 from typing import List
-from sqlalchemy import desc
 
-from db.db import get_db
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
+
 from models.comment import Comment
 from schemas.comment import CommentCreate
 
@@ -10,8 +10,8 @@ from schemas.comment import CommentCreate
 class CommentCRUD:
     @staticmethod
     def create_comment(comment: CommentCreate, db: Session) -> Comment:
-        if comment.commenter_id == "" or comment.content == "":
-            raise ValueError("Neither commenter_id nor content can be EMPTY!")
+        if comment.commenter_id == '' or comment.content == '':
+            raise ValueError('Neither commenter_id nor content can be EMPTY!')
 
         try:
             db_comment = Comment(commenter_id=comment.commenter_id, content=comment.content)
@@ -21,7 +21,7 @@ class CommentCRUD:
             return db_comment
         except Exception as e:
             db.rollback()
-            raise e  
+            raise e
 
     @staticmethod
     def read_all_comment(db: Session) -> List[Comment]:

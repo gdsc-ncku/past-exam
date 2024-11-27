@@ -4,9 +4,9 @@ from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from core.config import get_settings
+from models.comment import Comment
 from models.file import File
 from models.user import User
-from models.comment import Comment
 
 Base = declarative_base()
 
