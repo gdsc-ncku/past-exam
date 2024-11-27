@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from models.comment import Comment
-from schemas.comment import CommentCreate
+from schemas.comment.main import CommentCreate
 
 
 class CommentCRUD:

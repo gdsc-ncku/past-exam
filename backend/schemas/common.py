@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Generic, Literal, Optional, TypeVar, Union
+from typing import Generic, Literal, Optional, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -23,19 +23,4 @@ class CommentResponseModel(BaseModel, Generic[T]):
     status: Literal['success', 'error']
     message: Optional[str] = None
     data: Optional[T] = None
-    timestamp: Union[datetime, str] = datetime.now()
-
-    class Config:
-        json_schema_extra = {
-            'example': {
-                'status': 'success',
-                'message': None,
-                'data': {
-                    'comment_id': 1,
-                    'commenter_id': 'dennislee03',
-                    'content': 'Hello World!',
-                    'comment_time': '2024-11-18T03:18:41.691Z',
-                },
-                'timestamp': '2024-11-18T13:42:22.308579',
-            }
-        }
+    timestamp: datetime = Field(default_factory=lambda: datetime.now())

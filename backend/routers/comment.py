@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from crud.comment import CommentCRUD
 from db.db import get_db
-from schemas.comment import CommentCreate, CommentResponse
+from schemas.comment.main import CommentCreate, CommentResponse
 from schemas.common import CommentResponseModel
 
 router = APIRouter(tags=['comment'], prefix='/comment')
