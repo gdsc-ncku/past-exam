@@ -1,7 +1,5 @@
-from typing import Generator
-
 from sqlalchemy import URL, create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from core.config import get_settings
 from models.comment import Comment
@@ -29,5 +27,5 @@ def init_db():
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     Base = declarative_base()
     Base.metadata.create_all(
-        bind=engine, tables=[User.__table__, File.__table__,Comment.__table__]
+        bind=engine, tables=[User.__table__, File.__table__, Comment.__table__]
     )
