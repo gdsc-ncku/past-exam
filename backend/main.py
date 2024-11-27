@@ -9,6 +9,7 @@ from db.db import init_db
 from routers.file import router as file_router
 from routers.main import router as main_router
 from routers.user import router as user_router
+from routers.comment import router as comment_router
 
 
 @asynccontextmanager
@@ -21,6 +22,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(main_router)
 app.include_router(user_router)
 app.include_router(file_router)
+app.include_router(comment_router)
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Run the FastAPI application')
