@@ -13,28 +13,22 @@ from schemas.user import UserResponse as UserResponseSchema
 class UserCRUD:
     def create_user(self, db: Session, user: UserCreateSchema) -> ResponseModel[UserResponseSchema]:
         try:
-            if db.query(User).filter(
-                or_(User.username == user.username, User.email == user.email)
-            ).first():
-                raise HTTPException(
-                    status_code=400,
-                    detail="Username or email already exists."
-                )
-            
-            db_user = User(
-                username=user.username,
-                password=user.password,
-                email=user.email
-            )
+            if (
+                db.query(User)
+                .filter(or_(User.username == user.username, User.email == user.email))
+                .first()
+            ):
+                raise HTTPException(status_code=400, detail='Username or email already exists.')
+
+            db_user = User(username=user.username, password=user.password, email=user.email)
             db.add(db_user)
             db.commit()
             db.refresh(db_user)
 
             return ResponseModel(
-                status=ResponseStatus.SUCCESS,
-                data=UserResponseSchema.model_validate(db_user)
+                status=ResponseStatus.SUCCESS, data=UserResponseSchema.model_validate(db_user)
             )
-        
+
         except Exception:
             db.rollback()
             raise HTTPException(status_code=400, detail='Failed to create user.')
@@ -45,7 +39,7 @@ class UserCRUD:
 
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
-                data=[UserResponseSchema.model_validate(user) for user in users]
+                data=[UserResponseSchema.model_validate(user) for user in users],
             )
         except Exception:
             raise HTTPException(status_code=400, detail='Failed to read all users.')

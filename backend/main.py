@@ -6,10 +6,10 @@ import uvicorn
 from fastapi import FastAPI
 
 from db.db import init_db
+from routers.comment import router as comment_router
 from routers.file import router as file_router
 from routers.main import router as main_router
 from routers.user import router as user_router
-from routers.comment import router as comment_router
 
 
 @asynccontextmanager

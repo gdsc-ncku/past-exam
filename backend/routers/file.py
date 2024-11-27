@@ -23,11 +23,10 @@ async def create_file(
     upload_file: UploadFile = File(...),
     file_name: str = Form(...),
     uploader_id: int = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     file_data = FileCreateSchema(
-        filename=file_name or upload_file.filename,
-        uploader_id=uploader_id
+        filename=file_name or upload_file.filename, uploader_id=uploader_id
     )
     return await file_crud.create_file(db, file_data, upload_file)
 

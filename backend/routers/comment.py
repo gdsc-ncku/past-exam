@@ -5,10 +5,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from crud.comment import CommentCRUD
+from db.db import get_db
 from schemas.comment import CommentCreate, CommentResponse
 from schemas.common import CommentResponseModel
-from utils.comment import serialize_datetime as ser
-from db.db import get_db
 
 router = APIRouter(tags=['comment'], prefix='/comment')
 
@@ -22,32 +21,22 @@ router = APIRouter(tags=['comment'], prefix='/comment')
 async def create_comment(comment: CommentCreate, db: Session = Depends(get_db)):
     try:
         db_comment = CommentCRUD.create_comment(comment, db)
-        
+
         data = CommentResponse(
             commenter_id=db_comment.commenter_id,
             comment_time=db_comment.comment_time.isoformat(),
             content=db_comment.content,
             comment_id=db_comment.comment_id,
         )
-        return CommentResponseModel(
-            status="success",
-            message=None,
-            data=data
-        )
+        return CommentResponseModel(status='success', message=None, data=data)
     except Exception as e:
-
-    ###########################################
-        error_response = CommentResponseModel(
-            status="error",
-            message=str(e),
-            data=None
-        )
+        ###########################################
+        error_response = CommentResponseModel(status='error', message=str(e), data=None)
 
         error_response.timestamp = error_response.timestamp.isoformat()
 
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=error_response.model_dump()
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=error_response.model_dump()
         )
     ############################################
 
