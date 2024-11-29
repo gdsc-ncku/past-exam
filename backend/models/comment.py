@@ -14,6 +14,7 @@ class Comment(Base):
     comment_time: Mapped[BaseModel.timestamp]
 
     def __init__(self, commenter_id: str, content: str):
+        # empty str validation exception is in CommentCRUD's create
         self.commenter_id = commenter_id
         self.content = content
         self.comment_time = datetime.now()
