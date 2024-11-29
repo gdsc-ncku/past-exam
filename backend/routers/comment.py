@@ -82,7 +82,11 @@ async def read_all_comment(db: Session = Depends(get_db)):
     status_code=status.HTTP_200_OK,
 )
 async def read_comment_by_commenter(commenter_id: str, db: Session = Depends(get_db)):
-    "in latest order"
+    """
+    Retrieve comments by commenter ID
+
+    Returns comments in descending order of comment time
+    """
     try:
         comments = CommentCRUD.read_comment_by_commenter(commenter_id, db)
         if comments:
