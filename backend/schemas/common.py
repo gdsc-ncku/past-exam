@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Generic, Literal, Optional, TypeVar
+from typing import Generic, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -23,4 +23,4 @@ class CommentResponseModel(BaseModel, Generic[T]):
     status: Literal['success', 'error']
     message: Optional[str] = None
     data: Optional[T] = None
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
+    timestamp: Union[datetime, str] = datetime.now()
