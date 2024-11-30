@@ -19,6 +19,7 @@ router = APIRouter(tags=['comment'], prefix='/comment')
     response_description='Create a new comment',
 )
 async def create_comment(comment: CommentCreate, db: Session = Depends(get_db)):
+    # TODO: restrict characters of commenter_id
     try:
         db_comment = CommentCRUD.create_comment(comment, db)
 
@@ -44,7 +45,7 @@ async def read_all_comment(db: Session = Depends(get_db)):
             data = [
                 CommentResponse(
                     commenter_id=comment.commenter_id,
-                    comment_time=comment.comment_time,
+                    comment_time=comment.comment_time.isoformat(),
                     content=comment.content,
                     comment_id=comment.comment_id,
                 )
@@ -76,7 +77,7 @@ async def read_comment_by_commenter(commenter_id: str, db: Session = Depends(get
             data = [
                 CommentResponse(
                     commenter_id=comment.commenter_id,
-                    comment_time=comment.comment_time,
+                    comment_time=comment.comment_time.isoformat(),
                     content=comment.content,
                     comment_id=comment.comment_id,
                 )
@@ -96,14 +97,14 @@ async def read_comment_by_commenter(commenter_id: str, db: Session = Depends(get
     response_model=CommentResponseModel[CommentResponse],
     status_code=status.HTTP_200_OK,
 )
-async def delete_comment_by_id(comment_id: int, db: Session = Depends(get_db)):
+async def delete_comment_by_id(comment_id: int, current_user: str, db: Session = Depends(get_db)):
     # TODO: validate commenter_id to determine deleting or not
     try:
-        comment = CommentCRUD.delete_comment_by_id(comment_id, db)
+        comment = CommentCRUD.delete_comment_by_id(comment_id, current_user, db)
         if comment:
             data = CommentResponse(
                 commenter_id=comment.commenter_id,
-                comment_time=comment.comment_time,
+                comment_time=comment.comment_time.isoformat(),
                 content=comment.content,
                 comment_id=comment.comment_id,
             )
