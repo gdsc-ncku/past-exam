@@ -7,9 +7,5 @@ class UserBase(BaseModel):
     email: EmailStr
 
 
-class UserCreate(UserBase):
-    password: str
-
-
 class UserResponse(UserBase):
     user_id: int

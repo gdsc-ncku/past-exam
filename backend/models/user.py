@@ -14,7 +14,7 @@ class User(Base):
     __tablename__ = 'users'
     user_id: Mapped[BaseModel.int_primary_key]
     username: Mapped[BaseModel.str_base]
-    password: Mapped[BaseModel.str_base]
+    hashed_password: Mapped[BaseModel.str_base]
     email: Mapped[BaseModel.str_base]
     timestamp: Mapped[BaseModel.timestamp]
     files: Mapped[list['File']] = relationship(
@@ -25,9 +25,9 @@ class User(Base):
         order_by='File.filename',
     )
 
-    def __init__(self, username: str, password: str, email: EmailStr):
+    def __init__(self, username: str, hashed_password: str, email: EmailStr):
         self.username = username
-        self.password = password
+        self.hashed_password = hashed_password
         self.email = email
         self.timestamp = datetime.now()
         self.files = []

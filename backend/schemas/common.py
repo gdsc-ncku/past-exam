@@ -9,10 +9,9 @@ from schemas.comment.example import CommentConfig
 T = TypeVar('T')
 
 
-class ResponseStatus(Enum):
-    SUCCESS = 'success'
-    ERROR = 'error'
-
+class ResponseStatus(str, Enum):
+    SUCCESS = "success"
+    ERROR = "error"
 
 class ResponseModel(BaseModel, Generic[T]):
     status: ResponseStatus
