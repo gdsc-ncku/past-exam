@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class CommentBase(BaseModel):
-    commenter_id: str
-    content: str
+    commenter_id: str = 'DennisLee03'
+    content: str = 'Hello World!'
 
 
 class CommentCreate(CommentBase):
