@@ -27,14 +27,14 @@ class CommentConfig:
 
     RESPONSE_MODEL_EXAMPLE = {
         'status': 'success',
-        'message': None,
+        'message': 'Hello',
         'data': EXAMPLE_1,
         'timestamp': '2023-11-18T13:42:22.308579',
     }
 
     LIST_RESPONSE_MODEL_EXAMPLE = {
         'status': 'success',
-        'message': None,
+        'message': 'Hello',
         'data': [EXAMPLE_1, EXAMPLE_2, EXAMPLE_3],
         'timestamp': '2023-11-21T13:42:22.308579',
     }
