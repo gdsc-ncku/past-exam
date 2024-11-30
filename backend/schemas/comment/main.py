@@ -9,6 +9,8 @@ class CommentBase(BaseModel):
 
 
 class CommentCreate(CommentBase):
+    """Schema for creating a new comment. Inherits all fields from CommentBase."""
+
     pass
 
 
