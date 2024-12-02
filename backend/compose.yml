@@ -18,6 +18,8 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - postgres
+    environment:
+      - MODE=prod
     ports:
       - 8000:8000
     networks:
