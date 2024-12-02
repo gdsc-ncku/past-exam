@@ -10,7 +10,7 @@
     "prettier:check": "prettier --check --ignore-unknown .",
     "start": "next start",
     "test": "pnpm prettier:check && pnpm lint",
-    "prepare": "husky install"
+    "prepare": "cd .. &&husky install"
   },
   "git": {
     "pre-commit": "lint-staged"
