@@ -2,8 +2,9 @@
   "private": true,
   "packageManager": "pnpm@8.2.0",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "build": "set NODE_ENV=production next build",
+    "dev": "set NODE_ENV=development next dev",
+    "dev:local": "next dev",
     "lint": "next lint",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write --ignore-unknown .",
@@ -23,6 +24,7 @@
   },
   "dependencies": {
     "@heroicons/react": "2.1.3",
+    "axios": "1.7.9",
     "clsx": "2.1.1",
     "date-fns": "3.6.0",
     "dinero.js": "2.0.0-alpha.10",
@@ -49,6 +51,7 @@
     "@typescript-eslint/parser": "8.11.0",
     "@vercel/git-hooks": "1.0.0",
     "autoprefixer": "10.4.19",
+    "cross-env": "7.0.3",
     "eslint": "9.13.0",
     "eslint-config-next": "15.0.1",
     "eslint-plugin-react": "7.37.2",
