@@ -2,30 +2,41 @@
 import Image from 'next/image';
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import pastExamApi from '@/module/pastExamApi';
 
 interface FileWithPreview extends File {
   preview: string;
 }
-
 export const FileUploadField = () => {
-  const [files, setFiles] = useState<FileWithPreview[]>([]);
+  /**
+   * @todo
+   * 1. Use uploaderId from user global state
+   * 2. Handle multiple file submit
+   * 3. Handle filename (Base on file or explicit input)
+   */
+  const [file, setFile] = useState<FileWithPreview | null>(null);
+  const [uploaderId] = useState(1);
+  const [fileName, setFileName] = useState('');
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const mappedFiles = acceptedFiles.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      }),
-    );
-    setFiles((prevFiles) => [...prevFiles, ...mappedFiles]);
+    if (acceptedFiles.length > 0) {
+      const uploadedFile = acceptedFiles[0];
+      const mappedFile = Object.assign(uploadedFile, {
+        preview: URL.createObjectURL(uploadedFile),
+      });
+      setFile(mappedFile);
+      setFileName(uploadedFile.name);
+    }
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    multiple: true,
+    multiple: false,
   });
 
-  const removeFile = (fileName: string): void => {
-    setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+  const removeFile = (): void => {
+    setFile(null);
+    setFileName('');
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -33,6 +44,30 @@ export const FileUploadField = () => {
       return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
     }
     return `${(bytes / 1024).toFixed(2)} KB`;
+  };
+
+  const handleSubmit = async () => {
+    if (!file) {
+      alert('No file uploaded!');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('upload_file', file);
+    formData.append('file_name', fileName || file.name);
+    formData.append('uploader_id', uploaderId.toString());
+
+    try {
+      const response = await pastExamApi.uploadFile(formData);
+
+      if (response) {
+        alert('File uploaded successfully!');
+        setFile(null);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file.');
+    }
   };
 
   return (
@@ -43,49 +78,53 @@ export const FileUploadField = () => {
       >
         <div className="flex h-full w-full flex-col justify-center rounded-xl border-2 border-dotted p-5">
           <input {...getInputProps()} />
-          <p>Drag & drop files here, or click to select files</p>
+          <p>Drag & drop a file here, or click to select a file</p>
           <button
             type="button"
             className="mt-2 max-w-40 self-center rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
-            Select Files
+            Select File
           </button>
         </div>
       </div>
-      {files.length !== 0 && (
+      {file && (
         <div className="mt-4">
-          <h3 className="font-semibold">Selected Files</h3>
-          <ul className="mt-2 space-y-4">
-            {files.map((file, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between rounded-xl border border-gray-300 p-2"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="relative h-12 w-12 overflow-hidden rounded sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24">
-                    <Image
-                      src={file.preview}
-                      alt={file.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-medium">{file.name}</p>
-                    <p className="text-sm text-slate-50">
-                      {`${file.name.split('.')[1]} - ${formatFileSize(file.size)}`}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => removeFile(file.name)}
-                  className="rounded-lg bg-red-500 px-2 py-1 text-white hover:bg-red-600"
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
+          <h3 className="font-semibold">Selected File</h3>
+          <div className="mt-2 flex items-center justify-between rounded-xl border border-gray-300 p-2">
+            <div className="flex items-center space-x-4">
+              <div className="relative h-12 w-12 overflow-hidden rounded sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24">
+                <Image
+                  src={file.preview}
+                  alt={file.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <p className="font-medium">{file.name}</p>
+                <p className="text-sm text-slate-50">
+                  {formatFileSize(file.size)}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={removeFile}
+              className="rounded-lg bg-red-500 px-2 py-1 text-white hover:bg-red-600"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      )}
+      {file && (
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="rounded-lg bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+          >
+            Upload
+          </button>
         </div>
       )}
     </>
