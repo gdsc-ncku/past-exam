@@ -2,7 +2,7 @@ const path = require('path');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output:'standalone',
-    webpack: (config, { isServer }) => {
+    webpack: (config) => {
       config.resolve.alias['@'] = path.resolve(__dirname);
       return config;
     },

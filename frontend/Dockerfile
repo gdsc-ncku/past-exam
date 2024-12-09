@@ -1,13 +1,8 @@
 FROM node:20-bullseye-slim as base
 
-ENV NODE_ENV=production
-
 FROM base as builder
 
 WORKDIR /app
-
-# Set to development during build
-ENV NODE_ENV=development
 
 COPY package.json pnpm-lock.yaml ./
 
@@ -16,23 +11,23 @@ RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
-# Set back to production for the build
-ENV NODE_ENV=production
-
 RUN pnpm build
-
 
 FROM base as production
 
 WORKDIR /app
 
-COPY --from=builder /app/.next ./.next
+# Copy the standalone directory contents to the root
+COPY --from=builder /app/.next/standalone ./
+# Copy static files to the correct location
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 ENV PORT 3000
-# set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
 EXPOSE 3000
 
-CMD ["node", ".next/standalone/server.js"]
+# Update the path to server.js since we copied standalone contents to root
+CMD ["node", "server.js"]
 
