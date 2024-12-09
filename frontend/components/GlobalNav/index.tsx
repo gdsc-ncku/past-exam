@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { navLinks } from './Link';
 import Image from 'next/image';
-
 export const GlobalNav = () => {
   return (
     <div className="fixed top-0 z-10 w-full border-b border-gray-800 bg-gray-300 lg:w-full lg:border-b-0 lg:border-r lg:border-gray-800">
@@ -9,7 +8,7 @@ export const GlobalNav = () => {
         {/* Left Section - Logo and Search */}
         <div className="flex items-center space-x-4">
           <Image
-            src="/nextjs-icon-light-background.png"
+            src="/icon.png"
             className="h-10 rounded-full shadow-md"
             alt="Logo"
             width={40}
