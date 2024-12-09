@@ -3,30 +3,15 @@
 import Link from 'next/link';
 import { navLinks } from './Link';
 import Image from 'next/image';
-import { useUserStore } from 'global_state/useUserStore'; // Import Zustand store
-import { useState } from 'react'; // Import useState for dropdown toggle
+import { useNavigation } from '@/hooks/useNavigation';
+import { useAuthentication } from '@/hooks/useAuthentication';
 
 
 export const GlobalNav = () => {
-  // Access Zustand state and actions
-  const { currentUser, login, logout } = useUserStore();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Manage dropdown visibility
+  
+  const {isDropdownOpen,toggleDropdown} = useNavigation();
 
-  // Handle the login button click
-  const handleLoginClick = () => {
-    if (!currentUser) {
-      login(); // Simulate user login (you can replace this with actual login logic)
-    }
-  };
-
-  const handleLogout = () => {
-    logout(); // Clear user data when logging out
-    setIsDropdownOpen(false); // Close the dropdown after logout
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen); // Toggle the dropdown visibility
-  };
+  const{currentUser, handleLogout, handleLogin} = useAuthentication();
 
   return (
     <div className="fixed top-0 z-10 w-full border-b border-gray-800 bg-gray-300 lg:w-full lg:border-b-0 lg:border-r lg:border-gray-800">
@@ -79,7 +64,7 @@ export const GlobalNav = () => {
                   <ul className="space-y-2 p-2">
                     <li>
                       <button
-                        onClick={handleLogout}
+                        onClick={() => {handleLogout();toggleDropdown();}}
                         className="w-full text-left text-sm text-gray-700 hover:bg-gray-100 px-4 py-2 rounded"
                       >
                         Logout
@@ -92,7 +77,7 @@ export const GlobalNav = () => {
           ) : (
             // If not logged in, show the "Login" button
             <button
-              onClick={handleLoginClick}
+              onClick={handleLogin}
               className="text-white bg-blue-500 rounded-full px-4 py-2 transition-colors duration-200 hover:bg-blue-400"
             >
               Login
