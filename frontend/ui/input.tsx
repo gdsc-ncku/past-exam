@@ -1,17 +1,28 @@
 // frontend/ui/Input.tsx
 import React from 'react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  error?: boolean;
+  helperText?: string;
+}
 
-// 使用 React.forwardRef 來轉發 ref
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, error, helperText, ...props }, ref) => {
     return (
-      <input
-        ref={ref}
-        className={`mt-1 block w-full rounded border border-gray-300 p-2 ${className}`}
-        {...props}
-      />
+      <div>
+        <input
+          ref={ref}
+          className={`mt-1 block w-full rounded border p-2 ${
+            error
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+          } ${className}`}
+          {...props}
+        />
+        {error && helperText && (
+          <p className="mt-1 text-sm text-red-500">{helperText}</p>
+        )}
+      </div>
     );
   },
 );

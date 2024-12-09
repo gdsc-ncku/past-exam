@@ -1,6 +1,5 @@
-// /components/ProfileEdit.tsx
 'use client';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,13 +14,23 @@ import {
   FormMessage,
 } from '@/ui/Form';
 
+// Define the validation schema using Zod
 const ProfileSchema = z.object({
   email: z.string().email({ message: '無效的電子郵件地址' }),
-  // 使用 FileList 或 File | undefined 類型
   avatar: z
     .instanceof(FileList)
     .or(z.undefined())
-    .refine((fileList) => !fileList || fileList.length === 0),
+    .refine((fileList) => !fileList || fileList.length === 1, {
+      message: '請選擇一個圖片檔案',
+    })
+    .refine(
+      (fileList) => {
+        if (!fileList) return true;
+        const file = fileList[0];
+        return file.type.startsWith('image/');
+      },
+      { message: '請上傳有效的圖片檔案' },
+    ),
   username: z
     .string()
     .min(1, { message: '使用者名稱為必填項目' })
@@ -46,64 +55,95 @@ export default function ProfileEdit() {
     },
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    // 模擬從 API 獲取使用者資料
+    let mounted = true;
     const fetchUserData = async () => {
-      const userData = await mockFetchUserData();
-      setValue('email', userData.email);
-      setValue('username', userData.username);
+      try {
+        setIsLoading(true);
+        const userData = await mockFetchUserData();
+        if (!mounted) return;
+        setValue('email', userData.email);
+        setValue('username', userData.username);
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        // Use proper error notification system
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
     };
-
     fetchUserData();
+    return () => {
+      mounted = false;
+    };
   }, [setValue]);
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
       const validatedData = ProfileSchema.parse(data);
-      // 處理 Avatar 上傳
+      let updates = [];
+
       if (data.avatar && data.avatar.length > 0) {
-        await mockUploadAvatar(data.avatar[0]);
+        updates.push(mockUploadAvatar(data.avatar[0]));
       }
 
-      // 處理 Username 更新
-      await mockUpdateUsername(data.username);
+      updates.push(mockUpdateUsername(data.username));
 
-      alert('個人資料更新成功！');
+      // Wait for all async operations to complete
+      await Promise.all(updates);
+
+      // Use proper toast/notification system instead of alert
       console.log('驗證通過:', validatedData);
+      // Example: Toast.success('個人資料更新成功！');
     } catch (error) {
       console.error(error);
-      alert('更新個人資料失敗。');
+
+      if (error instanceof z.ZodError) {
+        console.error('Validation error:', error.errors);
+      } else if (error instanceof Error) {
+        console.error('Update error:', error.message);
+      }
+
+      // Example: Toast.error('更新個人資料失敗');
     }
   };
 
   return (
     <Form>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4"
+        aria-busy={isSubmitting}
+      >
         {/* Email 欄位（僅顯示，不可編輯） */}
         <FormField>
           <FormItem>
-            <FormLabel>Email</FormLabel>
+            <FormLabel htmlFor="email">Email</FormLabel>
             <FormControl>
               <Input
+                id="email"
                 type="email"
                 {...register('email')}
                 disabled
+                aria-readonly="true"
+                aria-label="Email address"
                 className="mt-1 block w-full rounded border border-gray-300 p-2 text-black"
               />
             </FormControl>
-            <FormMessage>{errors.email?.message}</FormMessage>
+            <FormMessage role="alert">{errors.email?.message}</FormMessage>
           </FormItem>
         </FormField>
 
-        {/* Avatar 上傳欄位，使用標準的 input 元件 */}
+        {/* Avatar 上傳欄位 */}
         <FormField>
           <FormItem>
-            <FormLabel>Avatar</FormLabel>
+            <FormLabel htmlFor="avatar">Avatar</FormLabel>
             <FormControl>
               <input
                 type="file"
                 accept="image/*"
                 {...register('avatar')}
+                disabled={isSubmitting}
                 className="mt-1 block w-full rounded border border-gray-300 p-2"
               />
             </FormControl>
@@ -114,12 +154,13 @@ export default function ProfileEdit() {
         {/* Username 編輯欄位 */}
         <FormField>
           <FormItem>
-            <FormLabel>Username</FormLabel>
+            <FormLabel htmlFor="username">Username</FormLabel>
             <FormControl>
               <Input
                 className="mt-1 block w-full rounded border border-gray-300 p-2 text-black"
                 type="text"
                 {...register('username')}
+                disabled={isSubmitting}
                 placeholder="輸入您的使用者名稱"
               />
             </FormControl>
@@ -129,7 +170,14 @@ export default function ProfileEdit() {
 
         {/* 提交按鈕 */}
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? '儲存中...' : '儲存變更'}
+          {isSubmitting ? (
+            <>
+              <span className="loading-spinner" aria-hidden="true" />
+              <span>儲存中...</span>
+            </>
+          ) : (
+            '儲存變更'
+          )}
         </Button>
       </form>
     </Form>
