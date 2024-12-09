@@ -6,7 +6,7 @@ export default function ProfileSidebar() {
     <aside className="w-64 bg-gray-800 p-4 text-white">
       <nav className="space-y-2">
         <Link
-          href="/profile/edit"
+          href="/profile"
           className="block rounded px-4 py-2 hover:bg-gray-700"
         >
           編輯個人資料

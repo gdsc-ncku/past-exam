@@ -21,13 +21,7 @@ const ProfileSchema = z.object({
   avatar: z
     .instanceof(FileList)
     .or(z.undefined())
-    .refine(
-      (fileList) =>
-        !fileList ||
-        fileList.length === 0 ||
-        (fileList[0] && fileList[0].size <= 5 * 1024 * 1024), // 限制檔案大小 5MB
-      { message: '檔案大小不得超過 5MB' },
-    ),
+    .refine((fileList) => !fileList || fileList.length === 0),
   username: z
     .string()
     .min(1, { message: '使用者名稱為必填項目' })
@@ -58,7 +52,6 @@ export default function ProfileEdit() {
       const userData = await mockFetchUserData();
       setValue('email', userData.email);
       setValue('username', userData.username);
-      // Avatar 可以根據需求處理
     };
 
     fetchUserData();
