@@ -29,8 +29,8 @@ jobs:
       - name: Deploy frontend
         uses: appleboy/ssh-action@v1.2.0
         with:
-            host: ${{ secrets.DEV_HOST }}
-            username: ${{ secrets.DEV_USERNAME }}
+            host: 10.2.0.53
+            username: pastexamadmin
             key: ${{ secrets.DEV_SSHKEY }}
             script: |
               docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
