@@ -40,9 +40,7 @@ jobs:
             username: ${{ secrets.DEV_USERNAME }}
             key: ${{ secrets.DEV_SSHKEY }}
             script: |
-              docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
-              docker stop pastexam-frontend >> /dev/null 2>&1
-              docker run -p 3000:3000 -d --name pastexam-frontend --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+                whoami
 
       - name: Disconnect from WireGuard
         run: |
