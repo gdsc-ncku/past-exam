@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { navLinks } from './Link';
 import Image from 'next/image';
-
 export const GlobalNav = () => {
   return (
     <div className="fixed top-0 z-10 w-full border-b border-gray-800 bg-gray-300 lg:w-full lg:border-b-0 lg:border-r lg:border-gray-800">
