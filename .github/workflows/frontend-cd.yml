@@ -31,7 +31,7 @@ jobs:
         run: |
           echo "{{ secrets.DEV_SSHKEY }}" > /tmp/pastexam-dev.pem
           chmod 600 /tmp/pastexam-dev.pem
-          ssh -i /tmp/pastexam-dev.pem {{ secrets.DEV_USERNAME }}@{{ env.DEV_HOST }}
+          ssh -i /tmp/pastexam-dev.pem {{ secrets.DEV_USERNAME }}@10.2.0.53
 
       - name: Pull the docker image
         run: |
