@@ -3,13 +3,7 @@ name: Trigger frontend cd workflow
 on:
   workflow_dispatch:
   workflow_call:
-    inputs:
-        runner-tag:
-            type: string
-            description: The tag of the runner to use
-        docker-image-tag:
-            type: string
-            description: The tag of the docker image to use
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/pastexam/frontend

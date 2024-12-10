@@ -6,3 +6,5 @@ on:
 jobs:
   trigger-frontend-ci:
     uses: ./.github/workflows/frontend-ci.yml
+  trigger-frontend-cd:
+    uses: ./.github/workflows/frontend-cd.yml
