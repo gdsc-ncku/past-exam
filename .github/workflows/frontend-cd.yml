@@ -8,7 +8,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/pastexam/frontend
   TAG: latest
-  DEV_HOST: 10.2.0.53
 
 jobs:
   ssh-into-server:
@@ -27,23 +26,16 @@ jobs:
         run: |
           sudo wg-quick up pastexam-dev
 
-      - name: SSH into server
-        run: |
-          echo "{{ secrets.DEV_SSHKEY }}" > /tmp/pastexam-dev.pem
-          chmod 600 /tmp/pastexam-dev.pem
-          ssh -i /tmp/pastexam-dev.pem pastexamadmin@10.2.0.53
-
-      - name: Pull the docker image
-        run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
-
-      - name: Stop the original container
-        run: |
-          docker stop pastexam-frontend >> /dev/null 2>&1
-
-      - name: Run the new container
-        run: |
-          docker run -p 3000:3000 -d --name pastexam-frontend --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+      - name: Deploy frontend
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+            host: ${{ secrets.DEV_HOST }}
+            username: ${{ secrets.DEV_USERNAME }}
+            key: ${{ secrets.DEV_SSHKEY }}
+            script: |
+              docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+              docker stop pastexam-frontend >> /dev/null 2>&1
+              docker run -p 3000:3000 -d --name pastexam-frontend --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
 
       - name: Disconnect from WireGuard
         run: |
