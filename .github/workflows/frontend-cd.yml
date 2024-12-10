@@ -3,6 +3,13 @@ name: Trigger frontend cd workflow
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      DEV_HOST:
+        required: true
+      DEV_USERNAME:
+        required: true
+      DEV_SSHKEY:
+        required: true
 
 env:
   REGISTRY: ghcr.io
