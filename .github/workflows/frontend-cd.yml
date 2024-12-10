@@ -10,6 +10,8 @@ on:
         required: true
       DEV_SSHKEY:
         required: true
+      WIREGUARD_CONFIG:
+        required: true
 
 env:
   REGISTRY: ghcr.io
@@ -31,6 +33,7 @@ jobs:
         
       - name: Connect to WireGuard
         run: |
+
           sudo wg-quick up pastexam-dev
       - name: Check wireguard connection
         run: |

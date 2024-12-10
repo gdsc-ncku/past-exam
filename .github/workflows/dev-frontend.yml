@@ -13,3 +13,4 @@ jobs:
       DEV_HOST: ${{ secrets.DEV_HOST }}
       DEV_USERNAME: ${{ secrets.DEV_USERNAME }}
       DEV_SSHKEY: ${{ secrets.DEV_SSHKEY }}
+      WIREGUARD_CONFIG: ${{ secrets.WIREGUARD_CONFIG }}
