@@ -8,6 +8,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/pastexam/frontend
   TAG: latest
+  DEV_HOST: 10.2.0.53
 
 jobs:
   ssh-into-server:
@@ -30,7 +31,7 @@ jobs:
         run: |
           echo "{{ secrets.DEV_SSHKEY }}" > /tmp/pastexam-dev.pem
           chmod 600 /tmp/pastexam-dev.pem
-          ssh -i /tmp/pastexam-dev.pem {{ secrets.DEV_USERNAME }}@{{ secrets.DEV_HOST }}
+          ssh -i /tmp/pastexam-dev.pem {{ secrets.DEV_USERNAME }}@{{ env.DEV_HOST }}
 
       - name: Pull the docker image
         run: |
