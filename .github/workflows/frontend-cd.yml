@@ -1,0 +1,57 @@
+name: Trigger frontend cd workflow
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+        runner-tag:
+            type: string
+            description: The tag of the runner to use
+        docker-image-tag:
+            type: string
+            description: The tag of the docker image to use
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/pastexam/frontend
+  TAG: latest
+
+jobs:
+  ssh-into-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install WireGuard
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wireguard
+
+      - name: Setup WireGuard configuration
+        run: |
+          echo "${{ secrets.WIREGUARD_CONFIG }}" | sudo tee /etc/wireguard/pastexam-dev.conf > /dev/null
+        
+      - name: Connect to WireGuard
+        run: |
+          sudo wg-quick up pastexam-dev
+
+      - name: SSH into server
+        run: |
+          ssh -i {{ secrets.DEV_SSHKEY }} {{ secrets.DEV_USERNAME }}@{{ secrets.DEV_HOST }}
+
+      - name: Pull the docker image
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+      - name: Stop the original container
+        run: |
+          docker stop pastexam-frontend >> /dev/null 2>&1
+
+      - name: Run the new container
+        run: |
+          docker run -p 3000:3000 -d --name pastexam-frontend --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+      - name: Disconnect from WireGuard
+        run: |
+          sudo wg-quick down pastexam-dev
+
+
+
+
