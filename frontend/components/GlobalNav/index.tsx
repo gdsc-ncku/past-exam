@@ -8,7 +8,7 @@ export const GlobalNav = () => {
         {/* Left Section - Logo and Search */}
         <div className="flex items-center space-x-4">
           <Image
-            src="/icon.png"
+            src="/nextjs-icon-light-background.png"
             className="h-10 rounded-full shadow-md"
             alt="Logo"
             width={40}
