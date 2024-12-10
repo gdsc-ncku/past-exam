@@ -32,7 +32,9 @@ jobs:
       - name: Connect to WireGuard
         run: |
           sudo wg-quick up pastexam-dev
-
+      - name: Check wireguard connection
+        run: |
+          ping -c 3 10.2.0.53
       - name: Deploy frontend
         uses: appleboy/ssh-action@v1.2.0
         with:
