@@ -6,11 +6,3 @@ on:
 jobs:
   trigger-frontend-ci:
     uses: ./.github/workflows/frontend-ci.yml
-  trigger-frontend-cd:
-    needs: trigger-frontend-ci
-    uses: ./.github/workflows/frontend-cd.yml
-    secrets:
-      DEV_HOST: ${{ secrets.DEV_HOST }}
-      DEV_USERNAME: ${{ secrets.DEV_USERNAME }}
-      DEV_SSHKEY: ${{ secrets.DEV_SSHKEY }}
-      WIREGUARD_CONFIG: ${{ secrets.WIREGUARD_CONFIG }}
