@@ -22,19 +22,24 @@ jobs:
   ssh-into-server:
     runs-on: ubuntu-latest
     steps:
-      - name: Install WireGuard
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wireguard resolvconf
+    #   - name: Install WireGuard
+    #     run: |
+    #       sudo apt-get update
+    #       sudo apt-get install -y wireguard resolvconf
 
-      - name: Setup WireGuard configuration
-        run: |
-          echo "${{ secrets.WIREGUARD_CONFIG }}" | sudo tee /etc/wireguard/pastexam-dev.conf > /dev/null
+    #   - name: Setup WireGuard configuration
+    #     run: |
+    #       echo "${{ secrets.WIREGUARD_CONFIG }}" | sudo tee /etc/wireguard/pastexam-dev.conf > /dev/null
         
-      - name: Connect to WireGuard
-        run: |
+    #   - name: Connect to WireGuard
+    #     run: |
+    #       sudo wg-quick up pastexam-dev
 
-          sudo wg-quick up pastexam-dev
+      - name: Set up WireGuard Connection
+        uses: niklaskeerl/easy-wireguard-action@v2
+        with:
+          WG_CONFIG_FILE: ${{ secrets.WIREGUARD_CONFIG }}
+
       - name: Check wireguard connection
         run: |
           ping -c 3 10.2.0.53
