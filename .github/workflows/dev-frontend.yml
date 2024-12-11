@@ -1,0 +1,13 @@
+name: Dev frontend workflow
+
+on:
+  push:
+    branches:
+      - 'dev/frontend@**'
+  workflow_dispatch:
+
+jobs:
+  trigger-frontend-ci:
+    uses: ./.github/workflows/frontend-ci.yml
+
+    # cd part use watchtower to update the container will be changed to a more clever way once we scale up our services
