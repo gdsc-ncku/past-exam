@@ -26,7 +26,11 @@ async def get_user_profile(
     user_id: str | None = Cookie(default=None),
 ):
     if not user_id:
-        raise HTTPException(status_code=401, detail='Not authenticated')
+        return ResponseModel(
+            status=ResponseStatus.ERROR,
+            message='Not authenticated',
+            data=None
+        )
     return user_crud.get_user_profile(db, user_id)
 
 

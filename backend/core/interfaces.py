@@ -23,19 +23,15 @@ class OAuthProvider(ABC):
         pass
 
 class TokenService(Protocol):
-    @abstractmethod
     def create_token(self, data: Dict) -> str:
         pass
 
-    @abstractmethod
     def verify_token(self, token: str) -> Dict:
         pass
 
 class CookieService(Protocol):
-    @abstractmethod
     def set_auth_cookie(self, response: Response, user_id: str) -> None:
         pass
 
-    @abstractmethod
     def clear_auth_cookie(self, response: Response) -> None:
         pass 

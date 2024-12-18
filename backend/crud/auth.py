@@ -44,7 +44,7 @@ class GoogleAuthProvider(OAuthProvider):
                 access_type='offline',
                 include_granted_scopes='true',
                 prompt='consent',
-                hd='gs.ncku.edu.tw'
+                hd=settings.google_allowed_domains
             )
             
             return authorization_url, state
@@ -103,14 +103,15 @@ class GoogleAuthProvider(OAuthProvider):
                 'token_expiry': credentials.expiry.timestamp() if credentials.expiry else None
             }
             
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=400,
-                detail=f"Failed to process OAuth callback: {str(e)}"
+                detail='Failed to process OAuth callback'
             )
 
     def verify_email_domain(self, email: str) -> bool:
-        return email.endswith('@gs.ncku.edu.tw')
+        settings = get_settings()
+        return email.endswith(f'@{settings.google_allowed_domains}')
 
     def _verify_oauth_token(self, code: str) -> Dict:
         settings = get_settings()

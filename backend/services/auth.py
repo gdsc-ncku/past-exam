@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 import jwt
@@ -12,7 +12,7 @@ class JWTService(TokenService):
     def create_token(self, data: Dict) -> str:
         settings = get_settings()
         to_encode = data.copy()
-        current_time = datetime.now(UTC)
+        current_time = datetime.now(timezone.utc)
         to_encode.update({
             "exp": current_time + timedelta(minutes=int(settings.jwt_access_token_expire_minutes)),
             "iat": current_time,

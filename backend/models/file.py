@@ -41,7 +41,6 @@ class File(Base):
         self.filename = filename
         self.file_location = file_location
         self.uploader_id = uploader_id
-        self.timestamp = datetime.now()
 
     def __repr__(self):
         return f'File(filename={self.filename})'

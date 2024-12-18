@@ -90,7 +90,7 @@ class UserCRUD:
             user_id: str,
             update_data: UserUpdateSchema,
     ) -> ResponseModel[UserResponseSchema]:
-        try:
+        with db.begin():
             user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise HTTPException(status_code=404, detail='User not found')
@@ -103,13 +103,7 @@ class UserCRUD:
             if user.username and user.email:
                 user.is_profile_completed = True
 
-            db.commit()
-            db.refresh(user)
-
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
                 data=UserResponseSchema.model_validate(user),
             )
-        except Exception:
-            db.rollback()
-            raise HTTPException(status_code=400, detail='Failed to update user profile.')
