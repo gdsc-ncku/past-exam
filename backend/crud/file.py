@@ -31,16 +31,19 @@ class FileCRUD:
     async def create_file(
         self, db: Session, file_data: FileCreateSchema, upload_file: UploadFile
     ) -> ResponseModel[FileResponseSchema]:
+        # TODO: file storage approach is still TBD
+
         try:
             self._validate_file(upload_file)
-            if file_data.uploader_id is not None:
-                user = db.query(User).filter(User.user_id == file_data.uploader_id).first()
-                if not user:
-                    raise HTTPException(
-                        status_code=404, detail=f'User with id {file_data.uploader_id} not found'
-                    )
 
-            # TODO: File storage approach is still TBD
+            user = db.query(User).filter(User.user_id == file_data.uploader_id).first()
+            if not user:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f'User with id ${file_data.uploader_id} not found.'
+                )
+
+            file_id = str(uuid4())
 
             os.makedirs(self.UPLOAD_DIR, exist_ok=True)
 
@@ -54,26 +57,39 @@ class FileCRUD:
                     f.write(content)
             except Exception:
                 raise HTTPException(status_code=500, detail='Failed to save file.')
-
-            db_file = File(
-                filename=file_data.filename or upload_file.filename,
-                uploader_id=file_data.uploader_id,
-                file_location=file_path,
-            )
-            db.add(db_file)
-            db.commit()
-            db.refresh(db_file)
-
-            return ResponseModel(
-                status=ResponseStatus.SUCCESS, data=FileResponseSchema.model_validate(db_file)
-            )
-
+            
+            try:
+                db_file = File(
+                    filename=file_data.filename,
+                    file_location=file_path,
+                    uploader_id=file_data.uploader_id,
+                    file_id=file_id
+                )
+                
+                db.add(db_file)
+                db.commit()
+                db.refresh(db_file)
+                                
+                return ResponseModel(
+                    status=ResponseStatus.SUCCESS,
+                    message="File uploaded successfully",
+                    data=db_file
+                )
+            except Exception:
+                raise HTTPException(status_code=500, detail="Failed to create file record")
+            
         except HTTPException:
-            db.rollback()
-            raise
-        except Exception:
-            db.rollback()
-            raise HTTPException(status_code=500, detail='Failed to create file.')
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+
+        except Exception as e:
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to process file upload: {str(e)}"
+            )
 
     def read_all_file(self, db: Session) -> ResponseModel[List[FileResponseSchema]]:
         try:
@@ -86,7 +102,7 @@ class FileCRUD:
         except Exception:
             raise HTTPException(status_code=500, detail='Failed to fetch files.')
 
-    def get_file_by_id(self, db: Session, file_id: int) -> ResponseModel[FileResponseSchema]:
+    def get_file_by_id(self, db: Session, file_id: str) -> ResponseModel[FileResponseSchema]:
         file = db.query(File).filter(File.file_id == file_id).first()
         if not file:
             raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
@@ -95,7 +111,7 @@ class FileCRUD:
             status=ResponseStatus.SUCCESS, data=FileResponseSchema.model_validate(file)
         )
 
-    def delete_file(self, db: Session, file_id: int) -> ResponseModel[None]:
+    def delete_file(self, db: Session, file_id: str) -> ResponseModel[None]:
         try:
             file = db.query(File).filter(File.file_id == file_id).first()
             if not file:
