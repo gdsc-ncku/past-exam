@@ -11,16 +11,21 @@ export const useUserStore = create<UserState>((set, get) => ({
   }));
 
 async function mockLogin(){
-    // Simulate a mock login process (fake API call)
-    const mockUser: User = {
-        userName: 'JohnDoe',
-        avatar: '/nextjs-icon-light-background.png',
-        email: 'johndoe@example.com',
-        isProfileCompleted: true,
-    };
+    return new Promise<void>((resolve, reject) => { //using Promise for better manage async function
+        // Simulate a mock login process (fake API call)
+        const mockUser: User = {
+            userName: 'JohnDoe',
+            avatar: '/nextjs-icon-light-background.png',
+            email: 'johndoe@example.com',
+            isProfileCompleted: true,
+        };
 
-    // Simulate a delay as if calling an API
-    setTimeout(() => {
-        useUserStore.setState({ currentUser: mockUser });
-    }, 1000); // 1 second delay for mock login
+        // Simulate a delay as if calling an API
+        const timer = setTimeout(() => {
+            useUserStore.setState({ currentUser: mockUser });
+            resolve();
+        }, 1000); // 1 second delay for mock login
+
+        return () => clearTimeout(timer);
+    });
 }
