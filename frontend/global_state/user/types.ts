@@ -10,5 +10,5 @@ export interface UserState {
     setUser: (user: User) => void; // Set user data in the store
     getUser: () => User | null; // Get the current user
     logout: () => void; // Log out by resetting user data
-    login: () => void; // Mock login function to simulate user login
+    login: () => Promise<void>; // Mock login function to simulate user login
 }
