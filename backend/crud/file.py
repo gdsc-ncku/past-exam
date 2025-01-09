@@ -81,6 +81,7 @@ class FileCRUD:
         except HTTPException:
             if file_path and os.path.exists(file_path):
                 os.remove(file_path)
+            raise
 
         except Exception as e:
             if file_path and os.path.exists(file_path):
