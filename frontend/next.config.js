@@ -32,6 +32,14 @@ const nextConfig = {
 
 module.exports = {
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_API_URL:
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  },
+  onDevelopment: () => {
+    if (!process.env.NEXT_PUBLIC_API_URL) {
+      console.warn(
+        'Warning: NEXT_PUBLIC_API_URL is not set, using default value',
+      );
+    }
   },
 };

@@ -1,5 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-
+interface UploadResponse {
+  success: boolean;
+  fileId: string;
+  url: string;
+}
 class PastExamApi {
   private axiosInstance: AxiosInstance;
 
@@ -44,9 +48,10 @@ class PastExamApi {
    * Upload file with `multipart/form-data`.
    * @param formData - FormData containing the file and associated data.
    */
-  async uploadFile(formData: FormData): Promise<any> {
+
+  async uploadFile(formData: FormData): Promise<UploadResponse> {
     try {
-      const response = await this.request<any>({
+      const response = await this.request<UploadResponse>({
         url: '/file',
         method: 'POST',
         headers: {

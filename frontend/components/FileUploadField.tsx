@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import pastExamApi from '@/module/pastExamApi';
 
@@ -17,7 +17,13 @@ export const FileUploadField = () => {
   const [file, setFile] = useState<FileWithPreview | null>(null);
   const [uploaderId] = useState(1);
   const [fileName, setFileName] = useState('');
-
+  useEffect(() => {
+    return () => {
+      if (file?.preview) {
+        URL.revokeObjectURL(file.preview);
+      }
+    };
+  }, [file]);
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       const uploadedFile = acceptedFiles[0];
@@ -35,6 +41,9 @@ export const FileUploadField = () => {
   });
 
   const removeFile = (): void => {
+    if (file?.preview) {
+      URL.revokeObjectURL(file.preview);
+    }
     setFile(null);
     setFileName('');
   };
