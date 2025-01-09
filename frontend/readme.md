@@ -1,28 +1,74 @@
-# Next.js App Router Playground
+# 考古平台前端
 
-Next.js recently introduced the App Router with support for:
+## Requirements
 
-- **Layouts:** Easily share UI while preserving state and avoiding re-renders.
-- **Server Components:** Making server-first the default for the most dynamic applications.
-- **Streaming:** Display instant loading states and stream in updates.
-- **Suspense for Data Fetching:** `async`/`await` support and the `use` hook for component-level fetching.
+- Node.js (20以上版本)
+- pnpm
 
-The App Router can coexist with the existing `pages` directory for incremental adoption. While you **don't need to use the App Router** when upgrading to Next.js 13, we're laying the foundations to build complex interfaces while shipping less JavaScript.
-
-## Running Locally
-
-1. Install dependencies:
+pnpm 下載方式:
 
 ```sh
-pnpm install
+npm install -g pnpm
 ```
 
-2. Start the dev server:
+## Installation
+
+1. Clone repo:
+
+   ```sh
+   git clone https://github.com/gdsc-ncku/past-exam.git
+   ```
+
+2. Navigate into the project directory:
+
+   ```sh
+   cd past-exam/frontend
+   ```
+
+3. Install dependencies:
+   ```sh
+   pnpm install
+   ```
+
+## Environment Variables
+
+本專案會使用 Environment Variable 來設置後段API位置
+frontend 資料夾裡面會提供 template.env 該檔案包含所有必需的Environment Variable的佔位符。
+
+Copy template.env to the appropriate .env file:
+
+- For local development, copy it to .env.local
+- For development/staging, copy it to .env.development
+- For production, copy it to .env.production
+
+## Running the Project
+
+### Local Backend
+
+To start with local backend, run:
+
+```sh
+pnpm dev:local
+```
+
+### Development Backend
+
+To start with a development server , run:
 
 ```sh
 pnpm dev
 ```
 
-## Documentation
+### Production
 
-https://nextjs.org/docs
+To start with a production server , run:
+
+```sh
+pnpm build
+pnpm start
+```
+
+Where:
+
+- pnpm build generates a production build.
+- pnpm start serves the build locally.
