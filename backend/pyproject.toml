@@ -16,6 +16,9 @@ ruff = "^0.6.9"
 pre-commit = "^4.0.1"
 psycopg2 = "^2.9.10"
 python-multipart = "^0.0.17"
+google-auth-oauthlib = "^1.2.1"
+google-auth = "^2.37.0"
+pyjwt = "^2.10.1"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

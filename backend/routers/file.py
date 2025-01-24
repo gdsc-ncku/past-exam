@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Cookie, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
 from crud.file import FileCRUD
@@ -9,9 +9,9 @@ from schemas.common import ResponseModel
 from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
 
-router = APIRouter(tags=['file'], prefix='/file')
-file_crud = FileCRUD()
+router = APIRouter(tags=['file'], prefix='/api/v1/file')
 
+file_crud = FileCRUD()
 
 @router.get('', response_model=ResponseModel[List[FileResponseSchema]])
 async def read_all_file(db: Session = Depends(get_db)):
@@ -22,20 +22,21 @@ async def read_all_file(db: Session = Depends(get_db)):
 async def create_file(
     upload_file: UploadFile = File(...),
     file_name: str = Form(...),
-    uploader_id: int = Form(...),
+    uploader_id: str | None = Cookie(default=None, alias='user_id'),
     db: Session = Depends(get_db),
 ):
     file_data = FileCreateSchema(
-        filename=file_name or upload_file.filename, uploader_id=uploader_id
-    )
+        filename=file_name,
+        uploader_id=uploader_id
+    )        
     return await file_crud.create_file(db, file_data, upload_file)
 
 
 @router.get('/{file_id}', response_model=ResponseModel[FileResponseSchema])
-async def get_file(file_id: int, db: Session = Depends(get_db)):
+async def get_file(file_id: str, db: Session = Depends(get_db)):
     return file_crud.get_file_by_id(db, file_id)
 
 
 @router.delete('/{file_id}', response_model=ResponseModel[None])
-async def delete_file(file_id: int, db: Session = Depends(get_db)):
+async def delete_file(file_id: str, db: Session = Depends(get_db)):
     return file_crud.delete_file(db, file_id)

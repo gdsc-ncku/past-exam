@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 class FileBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     filename: str
-    uploader_id: int
+    uploader_id: str | None
 
 
 class FileCreate(FileBase):
@@ -14,6 +14,6 @@ class FileCreate(FileBase):
 
 
 class FileResponse(FileBase):
-    file_id: int
+    file_id: str
     file_location: str
     timestamp: datetime

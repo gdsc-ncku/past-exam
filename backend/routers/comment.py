@@ -9,7 +9,7 @@ from schemas.comment.main import CommentCreate, CommentResponse
 from schemas.common import CommentResponseModel
 from utils.comment import error_response
 
-router = APIRouter(tags=['comment'], prefix='/comment')
+router = APIRouter(tags=['comment'], prefix='/api/v1/comment')
 
 
 @router.post(
