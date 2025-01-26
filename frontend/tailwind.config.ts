@@ -1,5 +1,6 @@
 import colors, { black } from 'tailwindcss/colors';
 import { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
 export default {
   content: [
@@ -27,6 +28,10 @@ export default {
           orange: '#F5A623',
           violet: '#7928CA',
         },
+      },
+      fontFamily: {
+        // Combine both Chinese + English fonts
+        'noto-inter': ['Inter', 'Noto Sans TC', 'sans-serif'],
       },
       backgroundImage: ({ theme }) => ({
         'vc-border-gradient': `radial-gradient(at left top, ${theme(
@@ -88,5 +93,83 @@ export default {
       }),
     },
   },
-  plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+
+    plugin(function({ addUtilities }) {
+      // 1) Typography "size" classes (no color)
+      const typographySizes = {
+        // ------------------------------------------
+        // H1
+        // ------------------------------------------
+        '.h1': {
+          '@apply font-noto-inter font-black text-[36px] leading-[48px] tracking-[-0.012em] text-left':
+            {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // H2
+        // ------------------------------------------
+        '.h2': {
+          '@apply font-noto-inter font-medium text-[30px] leading-[36px] tracking-[-0.0075em] text-left':
+            {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Large Content
+        // ------------------------------------------
+        '.large-content': {
+          '@apply font-noto-inter font-medium text-[18px] leading-[32px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Paragraph
+        // ------------------------------------------
+        '.paragraph': {
+          '@apply font-noto-inter font-normal text-[16px] leading-[32px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Small
+        // ------------------------------------------
+        '.small': {
+          '@apply font-noto-inter font-bold text-[14px] leading-[24px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Subtle
+        // ------------------------------------------
+        '.subtle': {
+          '@apply font-noto-inter font-normal text-[14px] leading-[20px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+      };
+
+      // 2) "Color" classes only (primary, secondary, tips)
+      const typographyColors = {
+        '.primary': {
+          color: '#000000', // 100%
+        },
+        '.secondary': {
+          color: 'rgba(0,0,0,0.7)', // 70%
+        },
+        '.tips': {
+          color: 'rgba(0,0,0,0.35)', // 35%
+        },
+      };
+
+      // Add them to Tailwind
+      addUtilities({
+        ...typographySizes,
+        ...typographyColors,
+      });
+    }),
+  ],
 } satisfies Config;
