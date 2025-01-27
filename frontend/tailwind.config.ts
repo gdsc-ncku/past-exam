@@ -121,7 +121,7 @@ export default {
         // ------------------------------------------
         // Large Content
         // ------------------------------------------
-        '.large-content': {
+        '.lc': {
           '@apply font-noto-inter font-medium text-[18px] leading-[32px] text-left': {},
           'text-underline-position': 'from-font',
           'text-decoration-skip-ink': 'none',
@@ -129,7 +129,7 @@ export default {
         // ------------------------------------------
         // Paragraph
         // ------------------------------------------
-        '.paragraph': {
+        '.p': {
           '@apply font-noto-inter font-normal text-[16px] leading-[32px] text-left': {},
           'text-underline-position': 'from-font',
           'text-decoration-skip-ink': 'none',
@@ -137,7 +137,7 @@ export default {
         // ------------------------------------------
         // Small
         // ------------------------------------------
-        '.small': {
+        '.sm': {
           '@apply font-noto-inter font-bold text-[14px] leading-[24px] text-left': {},
           'text-underline-position': 'from-font',
           'text-decoration-skip-ink': 'none',
@@ -145,7 +145,7 @@ export default {
         // ------------------------------------------
         // Subtle
         // ------------------------------------------
-        '.subtle': {
+        '.sb': {
           '@apply font-noto-inter font-normal text-[14px] leading-[20px] text-left': {},
           'text-underline-position': 'from-font',
           'text-decoration-skip-ink': 'none',
@@ -154,13 +154,13 @@ export default {
 
       // 2) "Color" classes only (primary, secondary, tips)
       const typographyColors = {
-        '.primary': {
+        '.pri': {
           color: '#000000', // 100%
         },
-        '.secondary': {
+        '.sec': {
           color: 'rgba(0,0,0,0.7)', // 70%
         },
-        '.tips': {
+        '.tip': {
           color: 'rgba(0,0,0,0.35)', // 35%
         },
       };
