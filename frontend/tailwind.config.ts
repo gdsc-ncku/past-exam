@@ -28,6 +28,26 @@ export default {
           orange: '#F5A623',
           violet: '#7928CA',
         },
+        primary: {
+          50: '#FBFFE5',
+          100: '#F3FFC7',
+          200: '#E6FF95',
+          300: '#CFFF4D',
+          400: '#BBF625',
+          500: '#9CDD05',
+          600: '#5A8605',
+          700: '#49690B',
+          800: '#3D59DE',
+          900: '#1F3201',
+        },
+        secondary: {
+          100: '#F0F0F0',
+          300: '#D7D7D7',
+          500: '#909090',
+          700: '#595959',
+          900: '#1B1B1B',
+        },
+        'warning': '#DC2626',
       },
       fontFamily: {
         // Combine both Chinese + English fonts
