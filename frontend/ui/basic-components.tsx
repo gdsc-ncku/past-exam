@@ -26,7 +26,6 @@ interface MainButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
       min-w-[64px] h-[40px]
       px-4 py-2
       rounded-md
-      bg-[#C3FF46]
       text-black
       text-[16px]
       transition
@@ -205,7 +204,7 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
         {children}
       </button>
     );
-  };;
+  };
 
 interface TagButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     /** The content inside the tag, usually text (and possibly an icon). */
@@ -259,7 +258,7 @@ interface LinkProps
   className?: string;
 }
 
-export const LinkButton = ({ children, href, ...props }) => {
+export const LinkButton: React.FC<LinkProps & { href?: string }> = ({ children, href, ...props }) => {
     // Base styles that apply to all link variants.
     const baseStyles = 
         `font-inter text-[14px] font-medium 
@@ -297,6 +296,8 @@ export const LinkButton = ({ children, href, ...props }) => {
   };
 
   interface TextwithIconProps {
+    /** Called when the button is clicked */
+    onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     /**
      * The content displayed within the button.
      * Can include both text and an icon as React children.
@@ -308,7 +309,7 @@ export const LinkButton = ({ children, href, ...props }) => {
    * A reusable button-like component that shows text alongside (or with) an icon.
    * It applies Tailwind-based styling for layout, sizing, coloring, and transitions.
    */
-  export const TextwithIcon: React.FC<TextwithIconProps> = ({ children }) => {
+  export const TextwithIcon: React.FC<TextwithIconProps> = ({ children, onClick }) => {
     // Define base styles with inline-flex for horizontal alignment,
     // small text size, black color, and medium weight
     const baseStyles = `
@@ -324,7 +325,9 @@ export const LinkButton = ({ children, href, ...props }) => {
     `;
   
     return (
-      <button className={clsx(baseStyles, variantStyles)}>
+      <button 
+        className={clsx(baseStyles, variantStyles)}
+        onClick={onClick}>
         {children}
       </button>
     );
