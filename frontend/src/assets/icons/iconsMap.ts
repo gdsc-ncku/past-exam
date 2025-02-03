@@ -54,6 +54,9 @@ import XSquare from './x-square.svg';
 import X from './x.svg';
 import ZoomIn from './zoom-in.svg';
 import ZoomOut from './zoom-out.svg';
+import BookMark from './bookmark.svg';
+import BookMarkBlack from './bookmark-1.svg';
+import Plus from './plus.svg';
 
 export const iconsMap = {
   'alert-circle': AlertCircle,
@@ -74,6 +77,8 @@ export const iconsMap = {
   'asterisk': Asterisk,
   'award': Award,
   'axis-3d': Axis3d,
+  'bookmark-1' : BookMarkBlack,
+  'bookmark': BookMark,
   'calendar-check-2': CalendarCheck2,
   'calendar': Calendar,
   'check-check': CheckCheck,
@@ -103,6 +108,7 @@ export const iconsMap = {
   'heart': Heart,
   'import': Import,
   'more-horizontal': MoreHorizontal,
+  'plus': Plus,
   'sticky-note': StickyNote,
   'user': User,
   'x-circle': XCircle,
