@@ -1,5 +1,6 @@
 import colors, { black } from 'tailwindcss/colors';
 import { Config } from 'tailwindcss';
+import plugin from 'tailwindcss/plugin';
 
 export default {
   content: [
@@ -27,6 +28,30 @@ export default {
           orange: '#F5A623',
           violet: '#7928CA',
         },
+        primary: {
+          50: '#F3FFC7',
+          100: '#E6FF95',
+          200: '#CFFF4C',
+          300: '#BBF625',
+          400: '#9CDD06',
+          500: '#78B103',
+          600: '#5A8604',
+          700: '#49690B',
+          800: '#3D590F',
+          900: '#1F3101',
+        },
+        secondary: {
+          100: '#F0F0F0',
+          300: '#D7D7D7',
+          500: '#909090',
+          700: '#595959',
+          900: '#1B1B1B',
+        },
+        'warning': '#DC2626',
+      },
+      fontFamily: {
+        // Combine both Chinese + English fonts
+        'noto-inter': ['Inter', 'Noto Sans TC', 'sans-serif'],
       },
       backgroundImage: ({ theme }) => ({
         'vc-border-gradient': `radial-gradient(at left top, ${theme(
@@ -88,5 +113,83 @@ export default {
       }),
     },
   },
-  plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+
+    plugin(function({ addUtilities }) {
+      // 1) Typography "size" classes (no color)
+      const typographySizes = {
+        // ------------------------------------------
+        // H1
+        // ------------------------------------------
+        '.h1': {
+          '@apply font-noto-inter font-black text-[36px] leading-[48px] tracking-[-0.012em] text-left':
+            {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // H2
+        // ------------------------------------------
+        '.h2': {
+          '@apply font-noto-inter font-medium text-[30px] leading-[36px] tracking-[-0.0075em] text-left':
+            {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Large Content
+        // ------------------------------------------
+        '.lc': {
+          '@apply font-noto-inter font-medium text-[18px] leading-[32px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Paragraph
+        // ------------------------------------------
+        '.p': {
+          '@apply font-noto-inter font-normal text-[16px] leading-[32px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Small
+        // ------------------------------------------
+        '.sm': {
+          '@apply font-noto-inter font-bold text-[14px] leading-[24px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+        // ------------------------------------------
+        // Subtle
+        // ------------------------------------------
+        '.sb': {
+          '@apply font-noto-inter font-normal text-[14px] leading-[20px] text-left': {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
+      };
+
+      // 2) "Color" classes only (primary, secondary, tips)
+      const typographyColors = {
+        '.pri': {
+          color: '#000000', // 100%
+        },
+        '.sec': {
+          color: 'rgba(0,0,0,0.7)', // 70%
+        },
+        '.tip': {
+          color: 'rgba(0,0,0,0.35)', // 35%
+        },
+      };
+
+      // Add them to Tailwind
+      addUtilities({
+        ...typographySizes,
+        ...typographyColors,
+      });
+    }),
+  ],
 } satisfies Config;
