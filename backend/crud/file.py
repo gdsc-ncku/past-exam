@@ -39,8 +39,7 @@ class FileCRUD:
             user = db.query(User).filter(User.user_id == file_data.uploader_id).first()
             if not user:
                 raise HTTPException(
-                    status_code=404,
-                    detail=f'User with id ${file_data.uploader_id} not found.'
+                    status_code=404, detail=f'User with id ${file_data.uploader_id} not found.'
                 )
 
             file_id = str(uuid4())
@@ -57,27 +56,27 @@ class FileCRUD:
                     f.write(content)
             except Exception:
                 raise HTTPException(status_code=500, detail='Failed to save file.')
-            
+
             try:
                 db_file = File(
                     filename=file_data.filename,
                     file_location=file_path,
                     uploader_id=file_data.uploader_id,
-                    file_id=file_id
+                    file_id=file_id,
                 )
-                
+
                 db.add(db_file)
                 db.commit()
                 db.refresh(db_file)
-                                
+
                 return ResponseModel(
                     status=ResponseStatus.SUCCESS,
-                    message="File uploaded successfully",
-                    data=db_file
+                    message='File uploaded successfully',
+                    data=db_file,
                 )
             except Exception:
-                raise HTTPException(status_code=500, detail="Failed to create file record")
-            
+                raise HTTPException(status_code=500, detail='Failed to create file record')
+
         except HTTPException:
             if file_path and os.path.exists(file_path):
                 os.remove(file_path)
@@ -87,10 +86,7 @@ class FileCRUD:
             if file_path and os.path.exists(file_path):
                 os.remove(file_path)
 
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to process file upload: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f'Failed to process file upload: {str(e)}')
 
     def read_all_file(self, db: Session) -> ResponseModel[List[FileResponseSchema]]:
         try:

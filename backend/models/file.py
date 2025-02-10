@@ -17,11 +17,9 @@ class File(Base):
     filename: Mapped[str] = mapped_column(String(255))
     file_location: Mapped[str] = mapped_column(String(500))
     timestamp: Mapped[datetime] = mapped_column(default=datetime.now)
-    
+
     uploader_id: Mapped[str] = mapped_column(
-        String(50), 
-        ForeignKey('users.user_id'),
-        nullable=False
+        String(50), ForeignKey('users.user_id'), nullable=False
     )
 
     uploader: Mapped['User'] = relationship(
@@ -31,11 +29,7 @@ class File(Base):
     )
 
     def __init__(
-            self,
-            filename: str,
-            file_location: str,
-            uploader_id: str,
-            file_id: str | None = None,
+        self, filename: str, file_location: str, uploader_id: str, file_id: str | None = None
     ):
         self.file_id = file_id
         self.filename = filename

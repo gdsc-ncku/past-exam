@@ -11,16 +11,13 @@ class OAuthProvider(ABC):
         pass
 
     @abstractmethod
-    def process_oauth_callback(
-        self,
-        db: Session,
-        code: str,
-    ) -> Dict:
+    def process_oauth_callback(self, db: Session, code: str) -> Dict:
         pass
 
     @abstractmethod
     def verify_email_domain(self, email: str) -> bool:
         pass
+
 
 class TokenService(Protocol):
     def create_token(self, data: Dict) -> str:
@@ -29,9 +26,10 @@ class TokenService(Protocol):
     def verify_token(self, token: str) -> Dict:
         pass
 
+
 class CookieService(Protocol):
     def set_auth_cookie(self, response: Response, user_id: str) -> None:
         pass
 
     def clear_auth_cookie(self, response: Response) -> None:
-        pass 
+        pass

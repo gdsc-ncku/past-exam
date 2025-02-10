@@ -1,5 +1,4 @@
 import os
-from argparse import ArgumentParser
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -26,18 +25,10 @@ app.include_router(file_router)
 app.include_router(comment_router)
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Run the FastAPI application')
-    parser.add_argument(
-        '--mode', type=str, default='dev', help='Specify the mode to run the application in'
-    )
-    args = parser.parse_args()
-
-    os.environ['MODE'] = args.mode
-
     uvicorn.run(
         'main:app',
         host='0.0.0.0',
         port=8000,
-        reload=True if args.mode == 'dev' else False,
+        reload=True if os.getenv('MODE') == 'dev' else False,
         log_level='info',
     )

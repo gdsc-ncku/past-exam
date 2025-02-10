@@ -11,14 +11,10 @@ from schemas.user import UserUpdate as UserUpdateSchema
 
 class UserCRUD:
     def get_or_create_user(
-            self,
-            db: Session,
-            google_user_info: dict,
+        self, db: Session, google_user_info: dict
     ) -> ResponseModel[UserResponseSchema]:
-        try:        
-            db_user = db.query(User).filter(
-                User.user_id == google_user_info['user_id']
-            ).first()
+        try:
+            db_user = db.query(User).filter(User.user_id == google_user_info['user_id']).first()
 
             if not db_user:
                 try:
@@ -30,10 +26,7 @@ class UserCRUD:
                         is_profile_completed=False,
                     )
                 except ValidationError as e:
-                    raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid user data: {str(e)}"
-                )
+                    raise HTTPException(status_code=400, detail=f'Invalid user data: {str(e)}')
 
                 db_user = User(
                     user_id=user_data.user_id,
@@ -49,61 +42,45 @@ class UserCRUD:
                     db.refresh(db_user)
                 except Exception as e:
                     db.rollback()
-                    raise HTTPException(
-                    status_code=400,
-                        detail=f"Database error: {str(e)}"
-                    )
+                    raise HTTPException(status_code=400, detail=f'Database error: {str(e)}')
 
             return ResponseModel(
-                status=ResponseStatus.SUCCESS,
-                data=UserResponseSchema.model_validate(db_user),
+                status=ResponseStatus.SUCCESS, data=UserResponseSchema.model_validate(db_user)
             )
         except HTTPException:
             raise
         except Exception as e:
             db.rollback()
-            raise HTTPException(
-                status_code=400,
-                detail=f"Failed to get or create user: {str(e)}"
-            )
-        
-    def get_user_profile(
-            self,
-            db: Session,
-            user_id: str,
-    ) -> ResponseModel[UserResponseSchema]:
+            raise HTTPException(status_code=400, detail=f'Failed to get or create user: {str(e)}')
+
+    def get_user_profile(self, db: Session, user_id: str) -> ResponseModel[UserResponseSchema]:
         try:
             user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise HTTPException(status_code=404, detail='User not found.')
-            
+
             return ResponseModel(
-                status=ResponseStatus.SUCCESS,
-                data=UserResponseSchema.model_validate(user),
+                status=ResponseStatus.SUCCESS, data=UserResponseSchema.model_validate(user)
             )
         except Exception:
             raise HTTPException(status_code=400, detail='Failed to get user profile.')
-        
+
     def update_user_profile(
-            self,
-            db: Session,
-            user_id: str,
-            update_data: UserUpdateSchema,
+        self, db: Session, user_id: str, update_data: UserUpdateSchema
     ) -> ResponseModel[UserResponseSchema]:
         with db.begin():
             user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise HTTPException(status_code=404, detail='User not found')
-            
+
             update_dict = update_data.model_dump(exclude_unset=True)
 
             for key, value in update_dict.items():
                 setattr(user, key, value)
-            
+
             if user.username and user.email:
                 user.is_profile_completed = True
 
             return ResponseModel(
-                status=ResponseStatus.SUCCESS,
-                data=UserResponseSchema.model_validate(user),
+                status=ResponseStatus.SUCCESS, data=UserResponseSchema.model_validate(user)
             )

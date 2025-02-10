@@ -30,12 +30,12 @@ class User(Base):
     )
 
     def __init__(
-            self,
-            user_id: str,
-            username: str,
-            email: EmailStr,
-            avatar: str | None = None,
-            is_profile_completed: bool = False,
+        self,
+        user_id: str,
+        username: str,
+        email: EmailStr,
+        avatar: str | None = None,
+        is_profile_completed: bool = False,
     ):
         self.user_id = user_id
         self.username = username

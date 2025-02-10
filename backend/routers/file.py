@@ -13,6 +13,7 @@ router = APIRouter(tags=['file'], prefix='/api/v1/file')
 
 file_crud = FileCRUD()
 
+
 @router.get('', response_model=ResponseModel[List[FileResponseSchema]])
 async def read_all_file(db: Session = Depends(get_db)):
     return file_crud.read_all_file(db)
@@ -25,10 +26,7 @@ async def create_file(
     uploader_id: str | None = Cookie(default=None, alias='user_id'),
     db: Session = Depends(get_db),
 ):
-    file_data = FileCreateSchema(
-        filename=file_name,
-        uploader_id=uploader_id
-    )        
+    file_data = FileCreateSchema(filename=file_name, uploader_id=uploader_id)
     return await file_crud.create_file(db, file_data, upload_file)
 
 

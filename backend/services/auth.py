@@ -13,16 +13,15 @@ class JWTService(TokenService):
         settings = get_settings()
         to_encode = data.copy()
         current_time = datetime.now(timezone.utc)
-        to_encode.update({
-            "exp": current_time + timedelta(minutes=int(settings.jwt_access_token_expire_minutes)),
-            "iat": current_time,
-            "nbf": current_time,
-        })
-        return jwt.encode(
-            to_encode,
-            settings.jwt_secret_key,
-            algorithm=settings.jwt_algorithm
+        to_encode.update(
+            {
+                'exp': current_time
+                + timedelta(minutes=int(settings.jwt_access_token_expire_minutes)),
+                'iat': current_time,
+                'nbf': current_time,
+            }
         )
+        return jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
     def verify_token(self, token: str) -> Dict:
         settings = get_settings()
@@ -31,12 +30,12 @@ class JWTService(TokenService):
                 token,
                 settings.jwt_secret_key,
                 algorithms=[settings.jwt_algorithm],
-                leeway=timedelta(seconds=30)
+                leeway=timedelta(seconds=30),
             )
         except jwt.ExpiredSignatureError:
-            raise ValueError("Token has expired")
+            raise ValueError('Token has expired')
         except jwt.InvalidTokenError as e:
-            raise ValueError(f"Invalid token: {str(e)}")
+            raise ValueError(f'Invalid token: {str(e)}')
 
 
 class AuthCookieService(CookieService):
@@ -48,8 +47,8 @@ class AuthCookieService(CookieService):
             httponly=True,
             secure=True,
             samesite='lax',
-            max_age=int(settings.jwt_access_token_expire_minutes) * 60
+            max_age=int(settings.jwt_access_token_expire_minutes) * 60,
         )
 
     def clear_auth_cookie(self, response: Response) -> None:
-        response.delete_cookie(key='user_id') 
+        response.delete_cookie(key='user_id')
