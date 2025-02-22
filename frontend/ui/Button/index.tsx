@@ -16,12 +16,12 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * - ghost: Minimal background with hover effect
  * - icon: Circular button for icons
  */
-export const Button: React.FC<ButtonProps> = ({
+export const Button = ({
   children,
   variant = 'main',
   disabled = false,
   ...props
-}) => {
+}: ButtonProps) => {
   /**
    * Base styles shared across all variants:
    * - inline-flex for alignment
@@ -119,10 +119,7 @@ interface TextwithIconProps {
  * A reusable button-like component that shows text alongside (or with) an icon.
  * It applies Tailwind-based styling for layout, sizing, coloring, and transitions.
  */
-export const TextwithIcon: React.FC<TextwithIconProps> = ({
-  children,
-  onClick,
-}) => {
+export const TextwithIcon = ({ children, onClick }: TextwithIconProps) => {
   // Define base styles with inline-flex for horizontal alignment,
   // small text size, black color, and medium weight
   const baseStyles = `
@@ -144,35 +141,6 @@ export const TextwithIcon: React.FC<TextwithIconProps> = ({
   );
 };
 
-interface MenuItemProps {
-  /** Optional icon (e.g., an SVG) shown on the left */
-  icon?: React.ReactNode;
-  /** The text or label displayed to the right of the icon */
-  children: React.ReactNode;
-}
-
-export const MenuItem: React.FC<MenuItemProps> = ({ icon, children }) => {
-  return (
-    <div
-      // If you want this to be purely non-interactive, remove hover/cursor classes
-      className={clsx(
-        'inline-flex items-center', // icon + text side by side
-        'min-h-[44px] w-[214px]', // match Figma dimensions
-        'gap-2 px-4', // internal padding & space between icon/text
-        'text-[16px] text-base text-secondary-700',
-        'transition-colors duration-200 hover:bg-primary-50', // highlight on hover
-      )}
-      // If you're using this in a <nav> or <ul>, consider a11y attributes:
-      // role="menuitem"
-    >
-      {/* Icon on the left if provided */}
-      {icon && <span>{icon}</span>}
-      {/* Text label on the right */}
-      <span>{children}</span>
-    </div>
-  );
-};
-
 export interface RadioButtonProps {
   /** Text label next to the radio button */
   label?: string;
@@ -184,11 +152,11 @@ export interface RadioButtonProps {
   onChange?: (checked: boolean) => void;
 }
 
-export const RadioButton: React.FC<RadioButtonProps> = ({
+export const RadioButton = ({
   label = 'Default',
   checked,
   onChange,
-}) => {
+}: RadioButtonProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e.target.checked);
   };

@@ -1,4 +1,4 @@
-import colors, { black } from 'tailwindcss/colors';
+import colors from 'tailwindcss/colors';
 import { Config } from 'tailwindcss';
 import plugin from 'tailwindcss/plugin';
 
