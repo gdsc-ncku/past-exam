@@ -1,5 +1,5 @@
 'use client';
-
+import React, { ChangeEvent } from 'react';
 import clsx from 'clsx';
 
 export interface CheckBoxProps {
@@ -15,7 +15,7 @@ export const CheckBox = ({
   onClick = () => {},
   className,
 }: CheckBoxProps) => {
-  const handleClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleClick = (e: ChangeEvent<HTMLInputElement>) => {
     onClick?.(e.target.checked);
   };
 
