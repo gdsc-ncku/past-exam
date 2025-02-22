@@ -1,4 +1,4 @@
-import React, { ButtonHTMLAttributes, ReactNode } from 'react';
+import React, { ButtonHTMLAttributes, ReactNode, MouseEvent } from 'react';
 import clsx from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -106,12 +106,10 @@ export const Button = ({
 };
 
 interface TextwithIconProps {
-  /** Called when the button is clicked */
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  /**
-   * The content displayed within the button.
-   * Can include both text and an icon as React children.
-   */
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
+
+  icon?: ReactNode;
+
   children: ReactNode;
 }
 
@@ -119,7 +117,11 @@ interface TextwithIconProps {
  * A reusable button-like component that shows text alongside (or with) an icon.
  * It applies Tailwind-based styling for layout, sizing, coloring, and transitions.
  */
-export const TextwithIcon = ({ children, onClick }: TextwithIconProps) => {
+export const TextwithIcon = ({
+  children,
+  onClick,
+  icon,
+}: TextwithIconProps) => {
   // Define base styles with inline-flex for horizontal alignment,
   // small text size, black color, and medium weight
   const baseStyles = `
@@ -128,14 +130,13 @@ export const TextwithIcon = ({ children, onClick }: TextwithIconProps) => {
       transition-colors duration-200 focus:outline-none
     `;
 
-  // Variant-specific styles: transparent background and
-  // a hover state that changes text color to secondary-700
   const variantStyles = `
       bg-transparent text-black hover:text-secondary-700
     `;
 
   return (
     <button className={clsx(baseStyles, variantStyles)} onClick={onClick}>
+      {icon && <span className="flex items-center">{icon}</span>}
       {children}
     </button>
   );
