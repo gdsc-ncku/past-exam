@@ -1,28 +1,13 @@
 services:
-  postgres:
-    image: postgres:latest
-    container_name: MyPostgres
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9090:9090"
+      - "9000:9000"
     volumes:
-      - ./db_data:/var/lib/postgresql/data
-    ports:
-      - ${POSTGRES_PORT}:5432
+      - ./minio:/data
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    networks:
-      - backend-network
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - postgres
-    ports:
-      - 8000:8000
-    networks:
-      - backend-network
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    command:   minio server /data  --console-address ":9000" --address ":9090"
 
-networks:
-  backend-network:
-    driver: bridge

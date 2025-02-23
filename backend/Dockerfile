@@ -1,28 +1,26 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11.10
+FROM golang:1.23 AS builder
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install poetry
+COPY go.mod go.sum ./
+RUN go mod tidy
 
-# Copy only requirements to cache them in docker layer
-COPY pyproject.toml poetry.lock* /app/
 
-# Project initialization:
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
+COPY . .
 
-# Copy project
-COPY . /app
+RUN go build -o main .
 
-EXPOSE 8000
+FROM alpine:latest
 
-# Run the application
-CMD ["poetry", "run", "python3", "main.py", "--mode", "prod"]
+WORKDIR /app
+
+COPY --from=builder /app/main .
+
+RUN apk add libc6-compat
+
+EXPOSE 8080
+
+CMD ["./main"]
+
+
