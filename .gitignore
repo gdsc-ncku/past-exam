@@ -43,3 +43,5 @@ yarn-error.log*
 **/minio_data
 
 backend/tmp
+backend/db_data/*
+*.pyc

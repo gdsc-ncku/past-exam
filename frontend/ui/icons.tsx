@@ -1,26 +1,20 @@
 import React from 'react';
-import { iconsMap, IconName } from 'src/assets/icons/iconsMap';  // your SVG imports
-import { colorMap } from 'styles/ColorMap';
-import { DesignSystemColor } from 'styles/ColorTokens';
+import { iconsMap, IconName } from '@/src/assets/icons/iconsMap'; // your SVG imports
 
 type IconProps = {
   /** The name of the icon (must exist in iconsMap). */
   name: IconName;
-  /** The color token from the design system. */
-  color?: DesignSystemColor;
+  /** Optional CSS class name. Can include Tailwind text-{color} and stroke-{color} classes */
+  className?: string;
 };
 
 /**
  * Reusable Icon component
  */
-export function Icon({
-  name,
-}: IconProps) {
+export function Icon({ name, className }: IconProps) {
   const SvgIcon = iconsMap[name];
 
   return (
-    <SvgIcon
-        aria-hidden="true"
-  />
+    <SvgIcon aria-hidden="true" className={`${className} stroke-current`} />
   );
 }
