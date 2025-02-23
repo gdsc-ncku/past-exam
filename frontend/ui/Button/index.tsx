@@ -7,6 +7,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Button style variant */
   variant?: 'main' | 'secondary' | 'ghost' | 'icon' | 'tag' | 'link';
   disabled?: boolean;
+  className?: string;
 }
 
 /**
@@ -20,6 +21,7 @@ export const Button = ({
   children,
   variant = 'main',
   disabled = false,
+  className,
   ...props
 }: ButtonProps) => {
   /**
@@ -96,6 +98,7 @@ export const Button = ({
       className={clsx(
         baseStyles,
         variantStyles[variant as keyof typeof variantStyles],
+        className,
       )}
       disabled={disabled}
       {...props}

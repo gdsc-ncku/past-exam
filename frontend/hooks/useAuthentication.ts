@@ -1,26 +1,28 @@
-import { selectIsAuthenticated } from '@/global_state/user/selectors';
-import { useUserStore } from '@/global_state/user/store'; // Import Zustand store
+import { useUserStore } from '@/global_state/user/store';
 
-export const useAuthentication = () =>{
-
-  const isAuthenticated = selectIsAuthenticated(useUserStore());
-  const {currentUser, login, logout} = useUserStore();
+export const useAuthentication = () => {
+  const store = useUserStore();
+  const isAuthenticated = !!store.currentUser;
+  const { currentUser, login, logout, refreshProfile } = store;
 
   // Handle the login button click
   const handleLogin = () => {
-      if (!isAuthenticated) {
-      login(); // Simulate user login (you can replace this with actual login logic)
-      }
+    if (isAuthenticated) {
+      return;
+    }
+    login();
   };
 
   const handleLogout = () => {
     logout(); // Clear user data when logging out
   };
-
-  return{
+  const handleRefreshProfile = () => {
+    refreshProfile();
+  };
+  return {
     currentUser,
     handleLogin,
     handleLogout,
+    handleRefreshProfile,
   };
 };
-

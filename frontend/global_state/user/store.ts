@@ -1,31 +1,45 @@
 // useUserStore.ts
 import { create } from 'zustand';
-import { User, UserState } from './types'; // Import the User interface
+import { User } from '@/global_state/User'; // Import the User interface
+import { userAPI } from '@/api/user';
+
+interface UserState {
+  currentUser: User | null; // Holds the current user or null
+  setUser: (user: User) => void; // Set user data in the store
+  getUser: () => User | null; // Get the current user
+  logout: () => void; // Log out by resetting user data
+  login: () => void; // Mock login function to simulate user login
+  refreshProfile: () => void; // Get the current user
+}
 
 export const useUserStore = create<UserState>((set, get) => ({
   currentUser: null, // Initialize currentUser as null
   setUser: (user: User) => set({ currentUser: user }), // Set user
   getUser: () => get().currentUser, // Return the current user
   logout: () => set({ currentUser: null }), // Clear user data
-  login: async () => mockLogin(),
-  }));
+  login: async () => login(),
+  refreshProfile: async () => refreshProfile(),
+}));
 
-async function mockLogin(){
-    return new Promise<void>((resolve, reject) => { //using Promise for better manage async function
-        // Simulate a mock login process (fake API call)
-        const mockUser: User = {
-            userName: 'JohnDoe',
-            avatar: '/nextjs-icon-light-background.png',
-            email: 'johndoe@example.com',
-            isProfileCompleted: true,
-        };
-
-        // Simulate a delay as if calling an API
-        const timer = setTimeout(() => {
-            useUserStore.setState({ currentUser: mockUser });
-            resolve();
-        }, 1000); // 1 second delay for mock login
-
-        return () => clearTimeout(timer);
-    });
+async function login() {
+  if (useUserStore.getState().currentUser) {
+    return;
+  }
+  if (useUserStore.getState().currentUser === null) {
+    // Check if we have an existing session cookie first
+    const profile = await userAPI.getProfile();
+    if (profile.data.status === 'success') {
+      useUserStore.getState().setUser(profile.data.data);
+      return;
+    }
+    userAPI.googleLogin();
+  }
+}
+async function refreshProfile() {
+  const profile = await userAPI.getProfile();
+  if (profile.data.status === 'success') {
+    useUserStore.getState().setUser(profile.data.data);
+  } else {
+    useUserStore.getState().logout();
+  }
 }
