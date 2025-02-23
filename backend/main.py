@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from db.db import init_db
 from routers.comment import router as comment_router
@@ -19,6 +20,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     lifespan=lifespan, docs_url='/api/docs', redoc_url='/api/redoc', openapi_url='/api/openapi.json'
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 app.include_router(main_router)
