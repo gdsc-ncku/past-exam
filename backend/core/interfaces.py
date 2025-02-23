@@ -28,7 +28,7 @@ class TokenService(Protocol):
 
 
 class CookieService(Protocol):
-    def set_auth_cookie(self, response: Response, user_id: str) -> None:
+    def set_auth_cookie(self, response: Response, token: str) -> None:
         pass
 
     def clear_auth_cookie(self, response: Response) -> None:

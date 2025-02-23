@@ -10,6 +10,9 @@ from routers.comment import router as comment_router
 from routers.file import router as file_router
 from routers.main import router as main_router
 from routers.user import router as user_router
+from core.config import get_settings
+
+settings = get_settings()
 
 
 @asynccontextmanager
@@ -24,10 +27,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=[settings.frontend_url],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=['*'],  # Allows all methods
+    allow_headers=['*'],  # Allows all headers
 )
 
 app.include_router(main_router)

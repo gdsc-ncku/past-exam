@@ -39,11 +39,11 @@ class JWTService(TokenService):
 
 
 class AuthCookieService(CookieService):
-    def set_auth_cookie(self, response: Response, user_id: str) -> None:
+    def set_auth_cookie(self, response: Response, token: str) -> None:
         settings = get_settings()
         response.set_cookie(
-            key='user_id',
-            value=user_id,
+            key='token',
+            value=token,
             httponly=True,
             secure=True,
             samesite='lax',
@@ -51,4 +51,4 @@ class AuthCookieService(CookieService):
         )
 
     def clear_auth_cookie(self, response: Response) -> None:
-        response.delete_cookie(key='user_id')
+        response.delete_cookie(key='token')

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str
     jwt_access_token_expire_minutes: str
+    frontend_url: str
 
 
 @lru_cache

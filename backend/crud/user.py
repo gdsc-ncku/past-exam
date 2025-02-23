@@ -7,11 +7,19 @@ from schemas.common import ResponseModel, ResponseStatus
 from schemas.user import UserCreate as UserCreateSchema
 from schemas.user import UserResponse as UserResponseSchema
 from schemas.user import UserUpdate as UserUpdateSchema
+from services.auth import JWTService
 
 
 class UserCRUD:
+    def __init__(self):
+        self.jwt_service = JWTService()
+
+    def get_user_id_from_token(self, token: str) -> str:
+        user_info = self.jwt_service.verify_token(token)
+        return user_info['user_id']
+
     def get_or_create_user(
-        self, db: Session, google_user_info: dict
+        self, db: Session, google_user_info: dict  # dont need token here since user might be login for the first time
     ) -> ResponseModel[UserResponseSchema]:
         try:
             db_user = db.query(User).filter(User.user_id == google_user_info['user_id']).first()
@@ -53,8 +61,9 @@ class UserCRUD:
             db.rollback()
             raise HTTPException(status_code=400, detail=f'Failed to get or create user: {str(e)}')
 
-    def get_user_profile(self, db: Session, user_id: str) -> ResponseModel[UserResponseSchema]:
+    def get_user_profile(self, db: Session, token: str) -> ResponseModel[UserResponseSchema]:
         try:
+            user_id = self.get_user_id_from_token(token)
             user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise HTTPException(status_code=404, detail='User not found.')
@@ -62,13 +71,15 @@ class UserCRUD:
             return ResponseModel(
                 status=ResponseStatus.SUCCESS, data=UserResponseSchema.model_validate(user)
             )
-        except Exception:
+        except Exception as e:
+            print(e)
             raise HTTPException(status_code=400, detail='Failed to get user profile.')
 
     def update_user_profile(
-        self, db: Session, user_id: str, update_data: UserUpdateSchema
+        self, db: Session, token: str, update_data: UserUpdateSchema
     ) -> ResponseModel[UserResponseSchema]:
         with db.begin():
+            user_id = self.get_user_id_from_token(token)
             user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise HTTPException(status_code=404, detail='User not found')

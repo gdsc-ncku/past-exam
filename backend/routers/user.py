@@ -1,9 +1,10 @@
 from typing import Dict
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
+from core.config import get_settings
 from crud.auth import GoogleAuthProvider
 from crud.user import UserCRUD
 from db.db import get_db
@@ -18,24 +19,25 @@ user_crud = UserCRUD()
 auth_provider = GoogleAuthProvider()
 jwt_service = JWTService()
 cookie_service = AuthCookieService()
+settings = get_settings()
 
 
 @router.get('/profile', response_model=ResponseModel[UserResponseSchema])
-async def get_user_profile(
-    db: Session = Depends(get_db), user_id: str | None = Cookie(default=None)
-):
-    if not user_id:
+async def get_user_profile(db: Session = Depends(get_db), token: str | None = Cookie(default=None)):
+    if not token:
         return ResponseModel(status=ResponseStatus.ERROR, message='Not authenticated', data=None)
-    return user_crud.get_user_profile(db, user_id)
+    return user_crud.get_user_profile(db, token)
 
 
 @router.patch('/profile', response_model=ResponseModel[UserResponseSchema])
 async def update_user_profile(
     update_data: UserUpdateSchema,
     db: Session = Depends(get_db),
-    user_id: str | None = Cookie(default=None),
+    token: str | None = Cookie(default=None),
 ):
-    return user_crud.update_user_profile(db, user_id, update_data)
+    if not token:
+        return ResponseModel(status=ResponseStatus.ERROR, message='Not authenticated', data=None)
+    return user_crud.update_user_profile(db, token, update_data)
 
 
 @router.get('/google/login')
@@ -54,29 +56,24 @@ async def google_oauth_callback(
 ) -> ResponseModel[Dict]:
     try:
         auth_result = auth_provider.process_oauth_callback(db=db, code=code)
-
         user_info = auth_result['user']
-
         token = jwt_service.create_token(
             {
+                'user_id': user_info['user_id'],
                 'sub': user_info['user_id'],
                 'email': user_info['email'],
                 'name': user_info['username'],
             }
         )
 
-        cookie_service.set_auth_cookie(response=response, user_id=user_info['user_id'])
+        # Create redirect response
+        redirect_url = settings.frontend_url  # Replace with your frontend URL
+        response = RedirectResponse(url=redirect_url)
 
-        return ResponseModel(
-            status=ResponseStatus.SUCCESS,
-            message='Successfully authenticated',
-            data={
-                'user': user_info,
-                'access_token': token,
-                'refresh_token': auth_result['refresh_token'],
-                'token_expiry': auth_result['token_expiry'],
-            },
-        )
+        # Set the cookie on the redirect response
+        cookie_service.set_auth_cookie(response=response, token=token)
+
+        return response
 
     except HTTPException as e:
         raise e
