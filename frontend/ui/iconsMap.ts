@@ -57,8 +57,11 @@ import BookMark from '@/assets/icons/bookmark.svg';
 import BookMarkBlack from '@/assets/icons/bookmark-1.svg';
 import Plus from '@/assets/icons/plus.svg';
 import Logo from '@/assets/icons/logo.svg';
-import Setting from '@/assets/icons/setting.svg';
+import Setting from '@/assets/icons/settings.svg';
 import Upload from '@/assets/icons/upload.svg';
+import Login from '@/assets/icons/log-in.svg';
+import Logout from '@/assets/icons/log-out.svg';
+import Star from '@/assets/icons/star.svg';
 
 export const iconsMap = {
   logo: Logo,
@@ -122,6 +125,9 @@ export const iconsMap = {
   'zoom-out': ZoomOut,
   setting: Setting,
   upload: Upload,
+  login: Login,
+  logout: Logout,
+  star: Star,
 };
 
 export type IconName = keyof typeof iconsMap;
