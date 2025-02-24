@@ -39,7 +39,7 @@ export const GlobalNav = () => {
             className="h-full w-full rounded-full"
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
+        <DropdownMenuContent className="w-56 bg-white">
           <DropdownMenuLabel className="whitespace-normal break-words">
             {user.userName}，歡迎回來！
           </DropdownMenuLabel>
