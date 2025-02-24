@@ -1,5 +1,5 @@
 import React from 'react';
-import { iconsMap, IconName } from '@/src/assets/icons/iconsMap'; // your SVG imports
+import { iconsMap, IconName } from '@/assets/icons/iconsMap'; // your SVG imports
 
 type IconProps = {
   /** The name of the icon (must exist in iconsMap). */

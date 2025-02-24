@@ -1,4 +1,4 @@
-import { useUserStore } from '@/global_state/user/store';
+import { useUserStore } from '@/module/zustand/user/store';
 
 export const useAuthentication = () => {
   const store = useUserStore();
