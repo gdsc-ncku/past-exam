@@ -1,18 +1,25 @@
-import { FileUploadField } from '@/components/FileUploadField';
-import { ExamCard } from '@/components/ExamCard';
+'use client';
+import { useState } from 'react';
+import { TextwithIcon } from '@/ui/Button';
+import { Icon } from '@/ui/icons';
+import Image from 'next/image';
 
 export default function Page() {
+  const [value, setValue] = useState('');
   return (
     <div className="space-y-8">
-      <h1 className="text-xl font-medium text-gray-300">Examples</h1>
-
-      <div className="space-y-10 rounded-2xl bg-cyan-700 text-white">
-        <FileUploadField />
+      <div className="flex flex-col gap-4">
+        <h1 className="text-2xl font-bold">Welcome to the Exam Portal</h1>
+        <p className="text-gray-600">
+          This is the main page of the exam portal. Here you can find all the
+          information you need about the exams.
+        </p>
       </div>
-      <div className="space-y-10 bg-red-700 text-white">
-        <ExamCard />
+      <div className="flex flex-col gap-4">
+        <TextwithIcon>
+          <Icon name="arrow-left-right" className="text-red-500" />
+        </TextwithIcon>
       </div>
-      <div className="space-y-10 text-white">xxsx</div>
     </div>
   );
 }
