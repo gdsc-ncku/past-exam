@@ -5,7 +5,7 @@ import { userAPI } from '@/module/api/user';
 
 interface UserState {
   currentUser: User | null; // Holds the current user or null
-  setUser: (user: User) => void; // Set user data in the store
+  setUser: (user: User | null) => void; // Set user data in the store
   getUser: () => User | null; // Get the current user
   logout: () => void; // Log out by resetting user data
   login: () => void; // Mock login function to simulate user login
@@ -14,7 +14,7 @@ interface UserState {
 
 export const useUserStore = create<UserState>((set, get) => ({
   currentUser: null, // Initialize currentUser as null
-  setUser: (user: User) => set({ currentUser: user }), // Set user
+  setUser: (user: User | null) => set({ currentUser: user }), // Set user
   getUser: () => get().currentUser, // Return the current user
   logout: async () => logout(),
   login: async () => login(),
@@ -42,9 +42,9 @@ async function login() {
     userAPI.googleLogin();
   }
 }
-async function logout() {
-  await userAPI.googleLogout();
-  useUserStore.getState().logout();
+function logout() {
+  userAPI.googleLogout();
+  useUserStore.getState().setUser(null);
 }
 async function refreshProfile() {
   const profile = await userAPI.getProfile();
@@ -56,7 +56,5 @@ async function refreshProfile() {
       isProfileCompleted: profile.data.data.is_profile_completed,
     };
     useUserStore.getState().setUser(userData);
-  } else {
-    useUserStore.getState().logout();
   }
 }
