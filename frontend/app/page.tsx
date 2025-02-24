@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { TextwithIcon } from '@/ui/Button';
 import { Icon } from '@/ui/icons';
+import Image from 'next/image';
 
 export default function Page() {
   const [value, setValue] = useState('');

@@ -15,6 +15,7 @@ export const useAuthentication = () => {
 
   const handleLogout = () => {
     logout(); // Clear user data when logging out
+    window.location.reload();
   };
   const handleRefreshProfile = () => {
     refreshProfile();

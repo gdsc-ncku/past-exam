@@ -16,7 +16,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   currentUser: null, // Initialize currentUser as null
   setUser: (user: User) => set({ currentUser: user }), // Set user
   getUser: () => get().currentUser, // Return the current user
-  logout: () => set({ currentUser: null }), // Clear user data
+  logout: async () => logout(),
   login: async () => login(),
   refreshProfile: async () => refreshProfile(),
 }));
@@ -36,12 +36,15 @@ async function login() {
         avatar: profile.data.data.avatar,
         isProfileCompleted: profile.data.data.is_profile_completed,
       };
-      console.log(userData);
       useUserStore.getState().setUser(userData);
       return;
     }
     userAPI.googleLogin();
   }
+}
+async function logout() {
+  await userAPI.googleLogout();
+  useUserStore.getState().logout();
 }
 async function refreshProfile() {
   const profile = await userAPI.getProfile();

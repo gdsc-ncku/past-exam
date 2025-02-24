@@ -1,5 +1,5 @@
 import React, { ButtonHTMLAttributes, ReactNode, MouseEvent } from 'react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** The visible content inside the button */
@@ -95,7 +95,7 @@ export const Button = ({
 
   return (
     <button
-      className={clsx(
+      className={cn(
         baseStyles,
         variantStyles[variant as keyof typeof variantStyles],
         className,
@@ -138,7 +138,7 @@ export const TextwithIcon = ({
     `;
 
   return (
-    <button className={clsx(baseStyles, variantStyles)} onClick={onClick}>
+    <button className={cn(baseStyles, variantStyles)} onClick={onClick}>
       {icon && <span className="flex items-center">{icon}</span>}
       {children}
     </button>
@@ -167,14 +167,14 @@ export const RadioButton = ({
 
   return (
     <label
-      className={clsx('inline-flex cursor-pointer select-none items-center')}
+      className={cn('inline-flex cursor-pointer select-none items-center')}
     >
       {/* The hidden native radio input */}
       <input
         type="radio"
         checked={checked}
         onChange={handleChange}
-        className={clsx(
+        className={cn(
           'sr-only', // Visually hide the real <input>
         )}
       />
@@ -182,14 +182,14 @@ export const RadioButton = ({
       <div className="relative h-4 w-4">
         {/* Outer circle */}
         <div
-          className={clsx(
+          className={cn(
             'absolute left-0 top-0 h-4 w-4 rounded-full border bg-white hover:border-secondary-900',
             checked ? 'border-black' : 'border-secondary-700',
           )}
         />
         {/* Inner circle (visible only if checked) */}
         <div
-          className={clsx(
+          className={cn(
             'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform',
             'h-3 w-3 rounded-full bg-black transition-all duration-200',
             checked ? 'scale-100' : 'scale-0',
@@ -198,9 +198,7 @@ export const RadioButton = ({
       </div>
 
       {/* Label text */}
-      <span
-        className={clsx('noto-inter ml-2 text-base font-normal text-black')}
-      >
+      <span className={cn('noto-inter ml-2 text-base font-normal text-black')}>
         {label}
       </span>
     </label>

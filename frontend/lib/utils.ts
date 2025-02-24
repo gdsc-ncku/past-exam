@@ -1,3 +1,10 @@
+import { twMerge } from 'tailwind-merge';
+import clsx from 'clsx';
+
+export const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
+
 export const formatDate = (date: Date) => {
   return date.toLocaleString('zh-TW', {
     year: 'numeric',
