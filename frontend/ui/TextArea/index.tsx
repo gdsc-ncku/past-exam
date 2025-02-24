@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import React, { ChangeEvent } from 'react';
 interface TextAreaProps {
   // The current text value of the textarea
@@ -18,7 +18,7 @@ export const TextArea = ({
   disabled = false,
 }: TextAreaProps) => {
   return (
-    // Renders a <textarea> element styled with Tailwind classes via clsx.
+    // Renders a <textarea> element styled with Tailwind classes via cn.
     // It's intentionally constrained in width (210px) and height (40px by h-10).
     <textarea
       // The current text value
@@ -28,7 +28,7 @@ export const TextArea = ({
       onChange={onChange}
       // Placeholder text if empty
       placeholder={placeholder}
-      className={clsx(
+      className={cn(
         // Base styles
         'h-10 w-[210px] resize-none gap-2.5 overflow-hidden rounded-md border-t px-3 py-2 text-black',
         'disabled:cursor-not-allowed disabled:border-secondary-500 disabled:bg-secondary-100 disabled:text-secondary-700',

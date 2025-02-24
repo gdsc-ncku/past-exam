@@ -1,6 +1,6 @@
 'use client';
 import React, { ChangeEvent } from 'react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 
 export interface CheckBoxProps {
   label?: string;
@@ -21,7 +21,7 @@ export const CheckBox = ({
 
   return (
     <label
-      className={clsx(
+      className={cn(
         'inline-flex cursor-pointer select-none items-center',
         className,
       )}
@@ -30,11 +30,11 @@ export const CheckBox = ({
         type="checkbox"
         checked={checked}
         onChange={handleClick}
-        className={clsx('sr-only')}
+        className={cn('sr-only')}
       />
 
       <div
-        className={clsx(
+        className={cn(
           'h-4 w-4 rounded-sm border transition-colors transition-colors',
           'duration-200 ease-in-out hover:border-secondary-900',
           checked
@@ -43,7 +43,7 @@ export const CheckBox = ({
         )}
       />
       <span
-        className={clsx('ml-2', 'noto-inter text-base font-normal text-black')}
+        className={cn('ml-2', 'noto-inter text-base font-normal text-black')}
       >
         {label}
       </span>
