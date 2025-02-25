@@ -134,6 +134,12 @@ export default {
           'text-underline-position': 'from-font',
           'text-decoration-skip-ink': 'none',
         },
+        '.text-large-content': {
+          '@apply font-noto-inter font-normal text-[18px] leading-[32px] text-left':
+            {},
+          'text-underline-position': 'from-font',
+          'text-decoration-skip-ink': 'none',
+        },
         // Paragraph - Main content text
         '.text-p': {
           '@apply font-noto-inter font-normal text-[16px] leading-[32px] text-left':

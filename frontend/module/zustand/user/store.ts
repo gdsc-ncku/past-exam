@@ -34,6 +34,7 @@ async function login() {
         userName: profile.data.data.username,
         email: profile.data.data.email,
         avatar: profile.data.data.avatar,
+        department: profile.data.data.department,
         isProfileCompleted: profile.data.data.is_profile_completed,
       };
       useUserStore.getState().setUser(userData);
@@ -53,6 +54,7 @@ async function refreshProfile() {
       userName: profile.data.data.username,
       email: profile.data.data.email,
       avatar: profile.data.data.avatar,
+      department: profile.data.data.department,
       isProfileCompleted: profile.data.data.is_profile_completed,
     };
     useUserStore.getState().setUser(userData);

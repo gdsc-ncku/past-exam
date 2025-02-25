@@ -2,7 +2,7 @@ import { axiosInstance } from './axios';
 
 interface UserUpdateData {
   username?: string;
-  email?: string;
+  department?: string;
   avatar?: string;
 }
 
