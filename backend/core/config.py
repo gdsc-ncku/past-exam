@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     # Required settings with their types
     minio_access_key: str
     minio_secret_key: str
+    minio_endpoint: str
+    minio_file_bucket: str
+    minio_user_avatar_bucket: str
     postgres_user: str
     postgres_password: str
     postgres_db: str

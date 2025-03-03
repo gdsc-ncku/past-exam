@@ -19,7 +19,9 @@ class UserCRUD:
         return user_info['user_id']
 
     def get_or_create_user(
-        self, db: Session, google_user_info: dict  # dont need token here since user might be login for the first time
+        self,
+        db: Session,
+        google_user_info: dict,  # dont need token here since user might be login for the first time
     ) -> ResponseModel[UserResponseSchema]:
         try:
             db_user = db.query(User).filter(User.user_id == google_user_info['user_id']).first()
@@ -89,7 +91,7 @@ class UserCRUD:
             for key, value in update_dict.items():
                 setattr(user, key, value)
 
-            if user.username and user.email:
+            if user.username and user.email and user.department:
                 user.is_profile_completed = True
 
             return ResponseModel(

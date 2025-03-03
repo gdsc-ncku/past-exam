@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
     avatar: Optional[str] = None
+    department: Optional[str] = None
     is_profile_completed: bool = False
 
 
@@ -26,3 +27,4 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     avatar: Optional[str] = None
+    department: Optional[str] = None

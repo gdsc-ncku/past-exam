@@ -10,9 +10,15 @@ from models.user import User
 from schemas.common import ResponseModel, ResponseStatus
 from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
+from services.minio import MinioService
+from core.config import get_settings
 
 
 class FileCRUD:
+    def __init__(self):
+        self.minio_service = MinioService()
+        self.settings = get_settings()
+
     UPLOAD_DIR = 'uploads'
     ALLOWED_EXTENSIONS = {'.pdf', '.doc', '.docx', '.txt'}
     MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -31,38 +37,31 @@ class FileCRUD:
     async def create_file(
         self, db: Session, file_data: FileCreateSchema, upload_file: UploadFile
     ) -> ResponseModel[FileResponseSchema]:
-        # TODO: file storage approach is still TBD
-
         try:
             self._validate_file(upload_file)
-
-            user = db.query(User).filter(User.user_id == file_data.uploader_id).first()
+            user = db.query(User).filter(User.user_id == file_data.user_id).first()
             if not user:
                 raise HTTPException(
-                    status_code=404, detail=f'User with id ${file_data.uploader_id} not found.'
+                    status_code=404, detail=f'User with id ${file_data.user_id} not found.'
                 )
-
-            file_id = str(uuid4())
-
-            os.makedirs(self.UPLOAD_DIR, exist_ok=True)
-
-            file_extension = os.path.splitext(upload_file.filename)[1].lower()
-            file_name = f'{uuid4()}{file_extension}'
-            file_path = os.path.join(self.UPLOAD_DIR, file_name)
 
             try:
                 content = await upload_file.read()
-                with open(file_path, 'wb') as f:
-                    f.write(content)
+                file_url = self.minio_service.upload_file(
+                    bucket_name=self.settings.minio_file_bucket,
+                    file_name=file_data.filename,
+                    user_id=file_data.user_id,
+                    data=content,
+                )
             except Exception:
                 raise HTTPException(status_code=500, detail='Failed to save file.')
 
             try:
                 db_file = File(
                     filename=file_data.filename,
-                    file_location=file_path,
-                    uploader_id=file_data.uploader_id,
-                    file_id=file_id,
+                    file_location='/'.join(file_url.split('/')[2:]),
+                    user_id=file_data.user_id,
+                    file_id=file_url.split('/')[-1],
                 )
 
                 db.add(db_file)
@@ -74,23 +73,19 @@ class FileCRUD:
                     message='File uploaded successfully',
                     data=db_file,
                 )
-            except Exception:
+
+            except Exception as e:
+                print(e)
                 raise HTTPException(status_code=500, detail='Failed to create file record')
 
         except HTTPException:
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
             raise
+        except Exception:
+            raise HTTPException(status_code=500, detail='Failed to process file upload')
 
-        except Exception as e:
-            if file_path and os.path.exists(file_path):
-                os.remove(file_path)
-
-            raise HTTPException(status_code=500, detail=f'Failed to process file upload: {str(e)}')
-
-    def read_all_file(self, db: Session) -> ResponseModel[List[FileResponseSchema]]:
+    def read_all_file(self, db: Session, user_id: str) -> ResponseModel[List[FileResponseSchema]]:
         try:
-            files = db.query(File).all()
+            files = db.query(File).filter(File.user_id == user_id).all()
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
                 data=[FileResponseSchema.model_validate(file) for file in files],
@@ -104,25 +99,30 @@ class FileCRUD:
         if not file:
             raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
 
-        return ResponseModel(
-            status=ResponseStatus.SUCCESS, data=FileResponseSchema.model_validate(file)
+        # Generate a temporary presigned URL that expires
+        presigned_url = self.minio_service.get_presigned_url(
+            bucket_name=self.settings.minio_file_bucket,
+            object_name=file.file_location,
+            expires=3600,  # URL expires in 1 hour
         )
 
-    def delete_file(self, db: Session, file_id: str) -> ResponseModel[None]:
+        # Create a copy of the file data with the temporary URL
+        file_data = FileResponseSchema.model_validate(file)
+        file_data.file_location = presigned_url
+
+        return ResponseModel(status=ResponseStatus.SUCCESS, data=file_data)
+
+    def delete_file(self, db: Session, file_id: str, user_id: str) -> ResponseModel[None]:
         try:
-            file = db.query(File).filter(File.file_id == file_id).first()
+            file = db.query(File).filter(File.file_id == file_id, File.user_id == user_id).first()
             if not file:
                 raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
 
-            if os.path.exists(file.file_location):
-                try:
-                    os.remove(file.file_location)
-                except Exception:
-                    raise HTTPException(status_code=500, detail='Failed to delete file.')
-
+            self.minio_service.delete_file(
+                bucket_name=self.settings.minio_file_bucket, object_name=file.file_location
+            )
             db.delete(file)
             db.commit()
-
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
                 message=f'File with id {file_id} deleted successfully',
@@ -131,6 +131,7 @@ class FileCRUD:
         except HTTPException:
             db.rollback()
             raise
-        except Exception:
+        except Exception as e:
             db.rollback()
+            print(e)
             raise HTTPException(status_code=500, detail='Failed to delete file.')

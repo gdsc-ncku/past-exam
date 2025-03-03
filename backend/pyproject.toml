@@ -19,6 +19,7 @@ python-multipart = "^0.0.17"
 google-auth-oauthlib = "^1.2.1"
 google-auth = "^2.37.0"
 pyjwt = "^2.10.1"
+minio = "^7.2.15"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
