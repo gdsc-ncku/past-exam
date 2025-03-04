@@ -86,7 +86,13 @@ export const GlobalNav = () => {
     <div className="fixed top-0 z-10 w-full border-b border-gray-800 lg:w-full lg:border-b-0 lg:border-r lg:border-gray-800">
       <div className="flex w-full items-center justify-between px-16 py-4">
         <div className="flex items-center space-x-4">
-          <Image src={logoImage} alt="logo" width={78} height={48} />
+          <Button
+            variant="ghost"
+            className="hover:bg-transparent"
+            onClick={() => router.push('/')}
+          >
+            <Image src={logoImage} alt="logo" width={78} height={48} />
+          </Button>
         </div>
         <div className="mr-16 flex items-center space-x-4">
           <div>

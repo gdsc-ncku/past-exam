@@ -3,6 +3,7 @@ export interface User {
   avatar: string;
   email: string;
   isProfileCompleted: boolean;
+  department: string;
 }
 
 export default User;
