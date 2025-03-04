@@ -1,10 +1,11 @@
-import os
-from minio import Minio
-from minio.error import S3Error
-from uuid import uuid4
-from core.config import get_settings
 import io
 from datetime import timedelta
+from uuid import uuid4
+
+from minio import Minio
+from minio.error import S3Error
+
+from core.config import get_settings
 
 settings = get_settings()
 
@@ -35,9 +36,10 @@ class MinioService:
 
     def get_presigned_url(self, bucket_name: str, object_name: str, expires: int = 3600):
         try:
-            return self.minio_client.presigned_get_object(
+            url = self.minio_client.presigned_get_object(
                 bucket_name=bucket_name, object_name=object_name, expires=timedelta(seconds=expires)
             )
+            return url.replace(settings.minio_endpoint, settings.minio_public_endpoint)
         except S3Error as e:
             print(f'Error getting presigned URL: {e}')
             return False
