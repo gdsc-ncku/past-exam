@@ -5,7 +5,7 @@
 - [FastAPI Backend Project](#fastapi-backend-project)
   - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
+  - [**Setup**](#setup)
   - [Running the Application](#running-the-application)
   - [API Endpoints](#api-endpoints)
   - [Development](#development)
@@ -17,7 +17,7 @@
 - Poetry [Installation Guide](https://python-poetry.org/docs/#installing-with-the-official-installer)
 - Docker and Docker Compose
 
-## Setup
+## **Setup**
 
 1. Clone the repository:
 
@@ -58,8 +58,7 @@
 
 2. Run the FastAPI application:
    ```
-   source .env.dev
-   poetry run python3 main.py 
+   poetry run python3 main.py --mode dev
    ```
 
    The application will be available at `http://localhost:8000`.

@@ -1,33 +1,28 @@
-FROM node:20-alpine as base
+FROM node:20-alpine AS base
 
-ENV NODE_ENV=production
-
-FROM base as builder
+FROM base AS builder
 
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN npm install -g pnpm
-
-RUN pnpm install
+RUN npm install -g pnpm && pnpm install
 
 COPY . .
 
-RUN pnpm run build
+RUN pnpm build
 
+FROM base AS production
 
-FROM base as production
+WORKDIR /app
 
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
-
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
-
-
+CMD ["node", "server.js"]
