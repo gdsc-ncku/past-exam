@@ -1,6 +1,6 @@
 from typing import Dict
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response
+from fastapi import APIRouter, Cookie, Depends, File, Form, HTTPException, Response, UploadFile
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -85,3 +85,23 @@ async def google_oauth_callback(
 async def google_logout(response: Response):
     cookie_service.clear_auth_cookie(response)
     return {'message': 'Logged out successfully'}
+
+
+@router.post('/avatar')
+async def upload_avatar(
+    upload_file: UploadFile = File(...),
+    file_name: str = Form(...),
+    token: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+):
+    if not token:
+        return ResponseModel(status=ResponseStatus.ERROR, message='Not authenticated', data=None)
+    print(file_name)
+    return await user_crud.upload_avatar(db, token, upload_file)
+
+
+@router.get('/avatar')
+async def get_avatar(db: Session = Depends(get_db), token: str | None = Cookie(default=None)):
+    if not token:
+        return ResponseModel(status=ResponseStatus.ERROR, message='Not authenticated', data=None)
+    return await user_crud.get_avatar(db, token)

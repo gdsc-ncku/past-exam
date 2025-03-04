@@ -1,17 +1,16 @@
 import os
 from typing import List
-from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
+from core.config import get_settings
 from models.file import File
 from models.user import User
 from schemas.common import ResponseModel, ResponseStatus
 from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
 from services.minio import MinioService
-from core.config import get_settings
 
 
 class FileCRUD:
@@ -49,11 +48,12 @@ class FileCRUD:
                 content = await upload_file.read()
                 file_url = self.minio_service.upload_file(
                     bucket_name=self.settings.minio_file_bucket,
-                    file_name=file_data.filename,
                     user_id=file_data.user_id,
+                    file_name=None,
                     data=content,
                 )
-            except Exception:
+            except Exception as e:
+                print(e)
                 raise HTTPException(status_code=500, detail='Failed to save file.')
 
             try:

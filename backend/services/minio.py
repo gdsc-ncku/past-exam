@@ -19,9 +19,9 @@ class MinioService:
             secure=False,
         )
 
-    def upload_file(self, bucket_name: str, file_name: str, user_id: str, data: bytes):
+    def upload_file(self, bucket_name: str, file_name: str | None, user_id: str, data: bytes):
         try:
-            file_name = f'{user_id}/{uuid4()}'
+            file_name = file_name if file_name else f'{user_id}/{uuid4()}'
             data_stream = io.BytesIO(data)
             data_size = len(data)
             self.minio_client.put_object(
