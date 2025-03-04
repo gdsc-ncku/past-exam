@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 import jwt
-from fastapi import Response
+from fastapi import Response, HTTPException
 
 from core.config import get_settings
 from core.interfaces import CookieService, TokenService
@@ -24,6 +24,8 @@ class JWTService(TokenService):
         return jwt.encode(to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
     def verify_token(self, token: str) -> Dict:
+        if not token:
+            raise HTTPException(status_code=401, detail='Token is required')
         settings = get_settings()
         try:
             return jwt.decode(
@@ -33,9 +35,17 @@ class JWTService(TokenService):
                 leeway=timedelta(seconds=30),
             )
         except jwt.ExpiredSignatureError:
-            raise ValueError('Token has expired')
-        except jwt.InvalidTokenError as e:
-            raise ValueError(f'Invalid token: {str(e)}')
+            raise HTTPException(
+                status_code=401,
+                detail='Token has expired',
+                headers={'Set-Cookie': 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'},
+            )
+        except jwt.InvalidTokenError:
+            raise HTTPException(
+                status_code=401,
+                detail=f'Invalid token',
+                headers={'Set-Cookie': 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'},
+            )
 
 
 class AuthCookieService(CookieService):

@@ -40,6 +40,6 @@ yarn-error.log*
 
 # backend
 
-**/minio
+**/minio_data
 
 backend/tmp

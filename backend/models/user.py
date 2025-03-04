@@ -20,6 +20,7 @@ class User(Base):
     timestamp: Mapped[datetime] = mapped_column(default=datetime.now)
     avatar: Mapped[str] = mapped_column(String(500), nullable=True)
     is_profile_completed: Mapped[bool] = mapped_column(default=False)
+    department: Mapped[str] = mapped_column(String(100), nullable=True)
 
     files: Mapped[list['File']] = relationship(
         'File',  # type: ignore
@@ -36,6 +37,7 @@ class User(Base):
         email: EmailStr,
         avatar: str | None = None,
         is_profile_completed: bool = False,
+        department: str | None = None,
     ):
         self.user_id = user_id
         self.username = username
@@ -44,6 +46,7 @@ class User(Base):
         self.is_profile_completed = is_profile_completed
         self.timestamp = datetime.now()
         self.files = []
+        self.department = department
 
     def __repr__(self):
         return f'User(username={self.username}, email={self.email})'
