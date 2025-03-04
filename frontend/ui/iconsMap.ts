@@ -62,7 +62,9 @@ import Upload from '@/assets/icons/upload.svg';
 import Login from '@/assets/icons/log-in.svg';
 import Logout from '@/assets/icons/log-out.svg';
 import Star from '@/assets/icons/star.svg';
-
+import ImagePlus from '@/assets/icons/image-plus.svg';
+import FileDown from '@/assets/icons/file-down.svg';
+import FolderClosed from '@/assets/icons/folder-closed.svg';
 export const iconsMap = {
   logo: Logo,
   'alert-circle': AlertCircle,
@@ -128,6 +130,9 @@ export const iconsMap = {
   login: Login,
   logout: Logout,
   star: Star,
+  'image-plus': ImagePlus,
+  'file-down': FileDown,
+  'folder-closed': FolderClosed,
 };
 
 export type IconName = keyof typeof iconsMap;
