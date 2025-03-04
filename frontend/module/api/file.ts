@@ -5,10 +5,20 @@ export const fileAPI = {
     return axiosInstance.get('/v1/file');
   },
 
-  createFile: (formData: FormData) => {
+  createFile: async (
+    formData: FormData,
+    onProgress: (progress: number) => void,
+  ) => {
     return axiosInstance.post('/v1/file', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+      headers: { 'Content-Type': 'multipart/form-data' },
+      withCredentials: true,
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
+          onProgress(percentCompleted);
+        }
       },
     });
   },
