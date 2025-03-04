@@ -1,6 +1,19 @@
-from pydantic import BaseModel
+from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
 
 
-class File(BaseModel):
-    filename: str  # The name of the file
-    uploader_id: int
+class FileBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    filename: str
+    user_id: str | None
+
+
+class FileCreate(FileBase):
+    pass
+
+
+class FileResponse(FileBase):
+    file_id: str
+    file_location: str
+    timestamp: datetime

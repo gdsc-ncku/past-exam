@@ -58,7 +58,8 @@
 
 2. Run the FastAPI application:
    ```
-   poetry run python3 main.py --mode dev
+   source .env.dev
+   poetry run python3 main.py 
    ```
 
    The application will be available at `http://localhost:8000`.

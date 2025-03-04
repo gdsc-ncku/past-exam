@@ -1,13 +1,31 @@
-import os
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=f'.env.{os.getenv("MODE","dev")}', extra='allow')
+    # Required settings with their types
+    minio_access_key: str
+    minio_secret_key: str
+    minio_endpoint: str
+    minio_public_endpoint: str
+    minio_file_bucket: str
+    minio_user_avatar_bucket: str
+    postgres_user: str
+    postgres_password: str
+    postgres_db: str
+    postgres_ip: str
+    postgres_port: str
+    google_redirect_uri: str
+    google_client_id: str
+    google_client_secret: str
+    google_allowed_domains: str
+    jwt_secret_key: str
+    jwt_algorithm: str
+    jwt_access_token_expire_minutes: str
+    frontend_url: str
 
 
 @lru_cache
 def get_settings():
-    return Settings(_env_file=f'.env.{os.getenv("MODE","dev")}')
+    return Settings()

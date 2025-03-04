@@ -1,27 +1,36 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Integer
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .base import Base, BaseModel
+from .base import Base
 
 if TYPE_CHECKING:
     from .user import User
 
 
 class File(Base):
-    __tablename__ = 'Files'
-    fileId: Mapped[BaseModel.int_primary_key]
-    filename: Mapped[BaseModel.str_base]
-    timestamp: Mapped[BaseModel.timestamp]
-    uploader: Mapped['User'] = relationship('User', back_populates='files')  # type: ignore
-    uploader_id: Mapped[int] = mapped_column(Integer, ForeignKey('Users.userId'))
+    __tablename__ = 'files'
 
-    def __init__(self, filename: str, uploader_id: int):
+    file_id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    filename: Mapped[str] = mapped_column(String(255))
+    file_location: Mapped[str] = mapped_column(String(500))
+    timestamp: Mapped[datetime] = mapped_column(default=datetime.now)
+
+    user_id: Mapped[str] = mapped_column(String(255), ForeignKey('users.user_id'), nullable=False)
+
+    uploader: Mapped['User'] = relationship(
+        'User',  # type: ignore
+        back_populates='files',
+        lazy='select',
+    )
+
+    def __init__(self, filename: str, file_location: str, user_id: str, file_id: str | None = None):
+        self.file_id = file_id
         self.filename = filename
-        self.uploader_id = uploader_id
-        self.timestamp = datetime.now()
+        self.file_location = file_location
+        self.user_id = user_id
 
     def __repr__(self):
-        return f'File(filename={self.filename}, uploader_id={self.uploader_id})'
+        return f'File(filename={self.filename})'
