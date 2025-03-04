@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: MyPostgres
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT}:5432
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - backend-network
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: MyMinio
+    volumes:
+      - ./minio_data:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    networks:
+      - backend-network
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      /usr/bin/mc mb myminio/${MINIO_FILE_BUCKET} --ignore-existing;
+      /usr/bin/mc mb myminio/${MINIO_USER_AVATAR_BUCKET} --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/${MINIO_FILE_BUCKET};
+      /usr/bin/mc anonymous set download myminio/${MINIO_USER_AVATAR_BUCKET};
+      exit 0;
+      "
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge

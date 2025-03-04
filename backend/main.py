@@ -5,12 +5,11 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from core.config import get_settings
 from db.db import init_db
 from routers.comment import router as comment_router
 from routers.file import router as file_router
-from routers.main import router as main_router
 from routers.user import router as user_router
-from core.config import get_settings
 
 settings = get_settings()
 
@@ -33,7 +32,6 @@ app.add_middleware(
     allow_headers=['*'],  # Allows all headers
 )
 
-app.include_router(main_router)
 app.include_router(user_router)
 app.include_router(file_router)
 app.include_router(comment_router)
