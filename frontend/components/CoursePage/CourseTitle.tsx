@@ -1,3 +1,4 @@
+import React from 'react';
 import { Icon } from '@/ui/icons';
 
 interface CourseTitleProps {
@@ -8,15 +9,15 @@ interface CourseTitleProps {
   section: string;
 }
 
-export const CourseTitle = ({
+export const CourseTitle: React.FC<CourseTitleProps> = ({
   title,
   courseId,
   professor,
   date,
   section,
-}: CourseTitleProps) => {
+}) => {
   return (
-    <div className="mb-8">
+    <div className="mb-2">
       <p className="text-small text-secondary">{courseId}</p>
       <h1 className="text-h1">{title}</h1>
       <div className="flex items-center space-x-2">
