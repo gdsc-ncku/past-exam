@@ -18,6 +18,8 @@ export default function SettingPage() {
   const { currentUser, handleRefreshProfile } = useAuthentication();
   const [userName, setUserName] = useState(currentUser?.userName || '');
   const [department, setDepartment] = useState(currentUser?.department || '');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [newAvatar, setNewAvatar] = useState<File | null>(null);
   const [errors, setErrors] = useState<{
     userName?: string;
     department?: string;
@@ -102,9 +104,38 @@ export default function SettingPage() {
                 height={250}
                 className="rounded-lg"
               />
-              <button className="absolute inset-x-0 bottom-0 flex h-1/5 items-center justify-center bg-black/30 text-white transition-opacity duration-200">
+              {/* Preview overlay */}
+              {previewUrl && (
+                <Image
+                  src={previewUrl}
+                  alt="preview"
+                  width={250}
+                  height={250}
+                  className="absolute inset-0 rounded-lg"
+                />
+              )}
+              <label className="absolute inset-x-0 bottom-0 flex h-1/5 cursor-pointer items-center justify-center bg-black/30 text-white transition-opacity duration-200">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast.error('檔案大小不能超過 5MB');
+                      return;
+                    }
+
+                    // Create preview URL
+                    const url = URL.createObjectURL(file);
+                    setPreviewUrl(url);
+                    setNewAvatar(file);
+                  }}
+                />
                 更換頭像
-              </button>
+              </label>
             </div>
           </div>
         </div>
