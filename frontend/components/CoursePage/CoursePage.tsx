@@ -179,8 +179,6 @@ export default function CoursePage() {
 
   return (
     <>
-      <CourseNavigation title={courseData.title} />
-
       <div className="mx-auto mt-8 max-w-6xl px-4">
         {/* Course Title */}
         <CourseTitle

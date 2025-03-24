@@ -1,12 +1,17 @@
 'use client';
 import React from 'react';
-import { Icon } from '@/ui/icons';
-import CoursePage from '@/components/CoursePage/CoursePage';
+import { CourseNavigation } from '@/components/CoursePage/CourseNavigation';
 
-export default function SearchLayout() {
+export default function CourseLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const course_title = '微積分 (一)';
   return (
     <div>
-      <CoursePage />
+      <CourseNavigation title={course_title} />
+      {children}
     </div>
   );
 }
