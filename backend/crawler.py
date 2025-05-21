@@ -8,7 +8,6 @@ from sqlalchemy import create_engine, text
 url = 'https://api.wavjaby.nckuctf.org/api/v0/historySearch?dept=ALL'
 df = pd.DataFrame()
 try:
-    raise Exception('Simulated error')
     response = requests.get(url)
     data = response.json()
 
@@ -125,6 +124,12 @@ try:
 
     # Create new table and insert data
     df.to_sql('courses', engine, if_exists='replace', index=False)
+
+    # Add primary key constraint
+    with engine.connect() as conn:
+        conn.execute(text('ALTER TABLE courses ADD PRIMARY KEY ("systemCode")'))
+        conn.commit()
+
     print('\nSuccessfully inserted data into PostgreSQL database!')
 
     # Print table information
