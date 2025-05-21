@@ -88,6 +88,9 @@ try:
 
     df = df.drop(columns=columns_to_drop)
 
+    # Create concatenated course_id as primary key
+    df['course_id'] = df['departmentId'] + df['serialNumber']
+
     csv_file_name = 'courses.csv'
     df.to_csv(csv_file_name, index=False, encoding='utf-8')
 except Exception as e:
@@ -127,10 +130,8 @@ try:
 
     # Add primary key constraint
     with engine.connect() as conn:
-        conn.execute(text('ALTER TABLE courses ADD PRIMARY KEY ("systemCode")'))
+        conn.execute(text('ALTER TABLE courses ADD PRIMARY KEY ("course_id")'))
         conn.commit()
-
-    print('\nSuccessfully inserted data into PostgreSQL database!')
 
     # Print table information
     with engine.connect() as conn:
