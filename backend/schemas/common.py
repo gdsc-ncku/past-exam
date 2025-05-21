@@ -9,16 +9,17 @@ from schemas.comment.example import CommentConfig
 T = TypeVar('T')
 
 
-class ResponseStatus(Enum):
+class ResponseStatus(str):
     SUCCESS = 'success'
     ERROR = 'error'
 
 
 class ResponseModel(BaseModel, Generic[T]):
-    status: ResponseStatus
+    status: Literal['success', 'error']
     message: Optional[str] = None
     data: Optional[T] = None
-    timestamp: datetime = Field(default_factory=datetime.now)
+    total: Optional[int] = None
+    timestamp: Optional[str] = None
 
 
 class CommentResponseModel(BaseModel, Generic[T]):

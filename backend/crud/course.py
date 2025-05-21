@@ -5,14 +5,14 @@ from sqlalchemy import or_, func, and_
 from sqlalchemy.orm import Session
 
 from models.course import Course
-from schemas.common import ResponseModel, ResponseStatus
+from schemas.common import ResponseModel
 from schemas.course import CourseResponse, CourseSearchParams
 
 
 class CourseCRUD:
     @staticmethod
     def search_courses(
-        db: Session, search_params: CourseSearchParams, offset: int = 0, limit: int = 100
+        db: Session, search_params: CourseSearchParams, offset: int = 0, limit: int = 10
     ) -> ResponseModel[List[CourseResponse]]:
         try:
             query = db.query(Course)
@@ -89,9 +89,10 @@ class CourseCRUD:
             courses = query.offset(offset).limit(limit).all()
 
             return ResponseModel(
-                status=ResponseStatus.SUCCESS,
+                status='success',
                 data=[CourseResponse.model_validate(course) for course in courses],
                 message=f'Found {total} courses',
+                total=total,
             )
 
         except Exception as e:
@@ -105,7 +106,7 @@ class CourseCRUD:
                 raise HTTPException(status_code=404, detail=f'Course with id {course_id} not found')
 
             return ResponseModel(
-                status=ResponseStatus.SUCCESS, data=CourseResponse.model_validate(course)
+                status='success', data=CourseResponse.model_validate(course)
             )
 
         except HTTPException:

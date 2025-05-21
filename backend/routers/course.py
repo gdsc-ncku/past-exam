@@ -16,7 +16,7 @@ course_crud = CourseCRUD()
 async def search_courses(
     search_params: CourseSearchParams = Depends(),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=100, ge=1, le=100),
+    limit: int = Query(default=10, ge=1, le=10),
     db: Session = Depends(get_db),
 ):
     """
