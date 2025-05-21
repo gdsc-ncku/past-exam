@@ -18,6 +18,7 @@ services:
     volumes:
       - ./crawler.py:/app/crawler.py
       - ./crawler_requirements.txt:/app/requirements.txt
+      - ./courses.csv:/app/courses.csv
     working_dir: /app
     command: >
       sh -c "pip install -r requirements.txt &&
