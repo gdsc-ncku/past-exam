@@ -12,6 +12,20 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - backend-network
+  crawler:
+    image: python:3.11.10
+    container_name: MyCrawler
+    volumes:
+      - ./crawler.py:/app/crawler.py
+    environment:
+      - POSTGRES_IP=postgres
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    command: python3 crawler.py
+    networks:
+      - backend-network
   minio:
     image: quay.io/minio/minio:latest
     container_name: MyMinio
