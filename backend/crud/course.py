@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi import HTTPException
-from sqlalchemy import or_
+from sqlalchemy import or_, func, and_
 from sqlalchemy.orm import Session
 
 from models.course import Course
@@ -35,7 +35,32 @@ class CourseCRUD:
             if search_params.category:
                 query = query.filter(Course.category == search_params.category)
             if search_params.courseName:
-                query = query.filter(Course.courseName.ilike(f'%{search_params.courseName}%'))
+                query = query.filter(Course.courseName == search_params.courseName)
+            if search_params.courseNameSearch:
+                # Combine trigram similarity with ILIKE for better search results
+                search_term = search_params.courseNameSearch
+                # Split search term into words for better matching
+                search_words = search_term.split()
+                
+                # Build a list of conditions for each word
+                word_conditions = []
+                for word in search_words:
+                    word_conditions.append(
+                        or_(
+                            Course.courseName.ilike(f'%{word}%'),  # Partial match
+                            func.similarity(Course.courseName, word) > 0.1,  # Lower threshold for trigram
+                        )
+                    )
+                
+                # Combine all word conditions with AND
+                if word_conditions:
+                    query = query.filter(and_(*word_conditions))
+                
+                # Order by both similarity and whether the term appears in the name
+                query = query.order_by(
+                    func.similarity(Course.courseName, search_term).desc(),
+                    Course.courseName.ilike(f'%{search_term}%').desc()
+                )
             if search_params.tags:
                 query = query.filter(Course.tags.ilike(f'%{search_params.tags}%'))
             if search_params.credits:

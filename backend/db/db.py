@@ -1,6 +1,6 @@
 from typing import Generator
 
-from sqlalchemy import URL, create_engine
+from sqlalchemy import URL, create_engine, text
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from core.config import get_settings
@@ -33,6 +33,12 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def init_db() -> None:
+    # Create pg_trgm extension if it doesn't exist
+    with engine.connect() as conn:
+        conn.execute(text('CREATE EXTENSION IF NOT EXISTS pg_trgm'))
+        conn.commit()
+
+    # Create tables
     Base.metadata.create_all(
         bind=engine, tables=[User.__table__, File.__table__, Comment.__table__, Course.__table__]
     )

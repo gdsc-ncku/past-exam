@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -35,7 +35,8 @@ class CourseSearchParams(BaseModel):
     forGrade: Optional[str] = None
     forClass: Optional[str] = None
     category: Optional[str] = None
-    courseName: Optional[str] = None
+    courseName: Optional[str] = None  # Exact match
+    courseNameSearch: Optional[str] = None  # Fuzzy search for course name
     tags: Optional[str] = None
     credits: Optional[str] = None
     instructors: Optional[str] = None
