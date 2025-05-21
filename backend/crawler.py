@@ -88,9 +88,6 @@ try:
 
     df = df.drop(columns=columns_to_drop)
 
-    # Create concatenated course_id as primary key
-    df['course_id'] = df['departmentId'] + df['serialNumber']
-
     csv_file_name = 'courses.csv'
     df.to_csv(csv_file_name, index=False, encoding='utf-8')
 except Exception as e:
@@ -117,7 +114,7 @@ engine = create_engine(
 # Convert list columns to string representation for database storage
 df['instructors'] = df['instructors'].apply(lambda x: ','.join(x) if isinstance(x, list) else x)
 df['tags'] = df['tags'].apply(lambda x: ','.join(x) if isinstance(x, list) else x)
-
+df['course_id'] = df['departmentId'] + df['serialNumber']
 # Create table and insert data
 try:
     # Drop existing table if it exists
