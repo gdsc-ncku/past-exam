@@ -114,7 +114,16 @@ engine = create_engine(
 # Convert list columns to string representation for database storage
 df['instructors'] = df['instructors'].apply(lambda x: ','.join(x) if isinstance(x, list) else x)
 df['tags'] = df['tags'].apply(lambda x: ','.join(x) if isinstance(x, list) else x)
+
+# Drop rows with NaN serialNumber
+df = df.dropna(subset=['serialNumber'])
+print(f'Number of rows after dropping NaN serialNumber: {len(df)}')
+
+# Convert serialNumber to clean string (remove .0)
+df['serialNumber'] = df['serialNumber'].astype(int).astype(str)
 df['course_id'] = df['departmentId'] + df['serialNumber']
+print(df.head())
+
 # Create table and insert data
 try:
     # Drop existing table if it exists
