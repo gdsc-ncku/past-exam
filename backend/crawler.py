@@ -12,6 +12,10 @@ try:
     data = response.json()
 
     df = pd.DataFrame(data.get('data', []))
+    # Convert all columns to string type initially to prevent NaN interpretation
+    df = df.astype(str)
+    # Replace 'nan' strings with actual NaN
+    df = df.replace('nan', pd.NA)
 
     # Rename columns to be more descriptive
     column_mapping = {
@@ -93,7 +97,11 @@ try:
 except Exception as e:
     print(f'Error fetching data: {e} fallback to local file')
     with open('courses.csv', 'r') as f:
-        df = pd.read_csv(f)
+        df = pd.read_csv(
+            f, na_values=[], keep_default_na=False, dtype=str
+        )  # Read all as string initially
+        # Replace 'nan' strings with actual NaN
+        df = df.replace('nan', pd.NA)
 
 
 # Database connection parameters
@@ -119,10 +127,24 @@ df['tags'] = df['tags'].apply(lambda x: ','.join(x) if isinstance(x, list) else 
 df = df.dropna(subset=['serialNumber'])
 print(f'Number of rows after dropping NaN serialNumber: {len(df)}')
 
-# Convert serialNumber to clean string (remove .0)
-df['serialNumber'] = df['serialNumber'].astype(int).astype(str)
+# Convert serialNumber from float string to int string
+df['serialNumber'] = df['serialNumber'].astype(float).astype(int).astype(str)
+df['serialNumber'] = df['serialNumber'].astype(str).str.zfill(3)
 df['course_id'] = df['departmentId'] + df['serialNumber']
-print(df.head())
+
+# Print rows with null course_id
+null_courses = df[df['course_id'].isna()]
+print('\nRows with null course_id:')
+print(null_courses)
+print(f'\nTotal rows with null course_id: {len(null_courses)}')
+print(df['course_id'])
+
+# Print rows with duplicate course_id
+dup_courses = df[df['course_id'].duplicated(keep=False)]
+print('\nRows with duplicate course_id:')
+print(dup_courses)
+print(f'\nTotal rows with duplicate course_id: {len(dup_courses)}')
+
 
 # Create table and insert data
 try:
