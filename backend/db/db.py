@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from core.config import get_settings
 from models.comment import Comment
+from models.course import Course
 from models.file import File
 from models.user import User
 
@@ -33,5 +34,5 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db() -> None:
     Base.metadata.create_all(
-        bind=engine, tables=[User.__table__, File.__table__, Comment.__table__]
+        bind=engine, tables=[User.__table__, File.__table__, Comment.__table__, Course.__table__]
     )

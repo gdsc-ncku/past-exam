@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import get_settings
 from db.db import init_db
 from routers.comment import router as comment_router
+from routers.course import router as course_router
 from routers.file import router as file_router
 from routers.user import router as user_router
 
@@ -35,6 +36,7 @@ app.add_middleware(
 app.include_router(user_router)
 app.include_router(file_router)
 app.include_router(comment_router)
+app.include_router(course_router)
 
 if __name__ == '__main__':
     uvicorn.run(
