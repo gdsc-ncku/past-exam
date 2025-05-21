@@ -12,6 +12,26 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - backend-network
+  crawler:
+    image: python:3.11.10
+    container_name: MyCrawler
+    volumes:
+      - ./crawler.py:/app/crawler.py
+      - ./crawler_requirements.txt:/app/requirements.txt
+    working_dir: /app
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             python crawler.py"
+    environment:
+      - POSTGRES_IP=postgres
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres
+    networks:
+      - backend-network
   minio:
     image: quay.io/minio/minio:latest
     container_name: MyMinio
@@ -29,6 +49,9 @@ services:
     image: minio/mc
     depends_on:
       - minio
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
     entrypoint: >
       /bin/sh -c "
       sleep 5;
