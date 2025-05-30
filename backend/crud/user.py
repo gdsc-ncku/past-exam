@@ -82,7 +82,7 @@ class UserCRUD:
         self, db: Session, token: str, update_data: UserUpdateSchema
     ) -> ResponseModel[UserResponseSchema]:
         with db.begin():
-            user_id = self.get_user_id_from_token(token)
+            user_id = self.jwt_service.verify_token(token)['user_id']
             user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise HTTPException(status_code=404, detail='User not found')

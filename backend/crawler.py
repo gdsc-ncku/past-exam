@@ -50,7 +50,7 @@ try:
     # Convert data types
     df['semester'] = df['semester'].astype(str)
     df['departmentId'] = df['departmentId'].astype(str)
-    df['serialNumber'] = df['serialNumber'].astype(str)
+    df['serialNumber'] = df['serialNumber'].astype('Int64')
     df['attributeCode'] = df['attributeCode'].astype(str)
     df['systemCode'] = df['systemCode'].astype(str)
     df['forGrade'] = pd.to_numeric(df['forGrade'], errors='coerce')
@@ -107,7 +107,7 @@ except Exception as e:
 # Database connection parameters
 user = os.getenv('POSTGRES_USER')
 password = os.getenv('POSTGRES_PASSWORD')
-host = os.getenv('POSTGRES_IP')
+host = 'localhost'
 port = os.getenv('POSTGRES_PORT')
 dbname = os.getenv('POSTGRES_DB')
 
@@ -125,10 +125,11 @@ df['tags'] = df['tags'].apply(lambda x: ','.join(x) if isinstance(x, list) else 
 
 # Drop rows with NaN serialNumber
 df = df.dropna(subset=['serialNumber'])
+df = df[df['serialNumber'] != '<NA>']
 print(f'Number of rows after dropping NaN serialNumber: {len(df)}')
-
+print(df['serialNumber'])
 # Convert serialNumber from float string to int string
-df['serialNumber'] = df['serialNumber'].astype(float).astype(int).astype(str)
+# df['serialNumber'] = df['serialNumber'].astype(float).astype(int).astype(str)   
 df['serialNumber'] = df['serialNumber'].astype(str).str.zfill(3)
 df['course_id'] = df['departmentId'] + df['serialNumber']
 

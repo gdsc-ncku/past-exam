@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Cookie, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
@@ -22,15 +22,30 @@ async def read_all_file(token: str | None = Cookie(default=None), db: Session = 
     return file_crud.read_all_file(db, user['user_id'])
 
 
+@router.get('/course/{course_id}', response_model=ResponseModel[List[FileResponseSchema]])
+async def get_files_by_course(
+    course_id: str,
+    token: str | None = Cookie(default=None), 
+    db: Session = Depends(get_db)
+):
+    jwt_service.verify_token(token)  # Verify user is authenticated
+    return file_crud.get_files_by_course(db, course_id)
+
+
 @router.post('', response_model=ResponseModel[FileResponseSchema])
 async def create_file(
     upload_file: UploadFile = File(...),
     file_name: str = Form(...),
+    course_id: Optional[str] = Form(None),
     token: str | None = Cookie(default=None),
     db: Session = Depends(get_db),
 ):
     user = jwt_service.verify_token(token)
-    file_data = FileCreateSchema(filename=file_name, user_id=user['user_id'])
+    file_data = FileCreateSchema(
+        filename=file_name, 
+        user_id=user['user_id'],
+        course_id=course_id
+    )
     return await file_crud.create_file(db, file_data, upload_file)
 
 

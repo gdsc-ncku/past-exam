@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from core.config import get_settings
 from models.file import File
 from models.user import User
+from models.course import Course
 from schemas.common import ResponseModel, ResponseStatus
 from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
@@ -44,6 +45,14 @@ class FileCRUD:
                     status_code=404, detail=f'User with id ${file_data.user_id} not found.'
                 )
 
+            # Validate course exists if course_id is provided
+            if file_data.course_id:
+                course = db.query(Course).filter(Course.course_id == file_data.course_id).first()
+                if not course:
+                    raise HTTPException(
+                        status_code=404, detail=f'Course with id {file_data.course_id} not found.'
+                    )
+
             try:
                 content = await upload_file.read()
                 file_url = self.minio_service.upload_file(
@@ -62,6 +71,7 @@ class FileCRUD:
                     file_location='/'.join(file_url.split('/')[2:]),
                     user_id=file_data.user_id,
                     file_id=file_url.split('/')[-1],
+                    course_id=file_data.course_id,
                 )
 
                 db.add(db_file)
@@ -93,6 +103,25 @@ class FileCRUD:
 
         except Exception:
             raise HTTPException(status_code=500, detail='Failed to fetch files.')
+
+    def get_files_by_course(self, db: Session, course_id: str) -> ResponseModel[List[FileResponseSchema]]:
+        try:
+            # Validate course exists
+            course = db.query(Course).filter(Course.course_id == course_id).first()
+            if not course:
+                raise HTTPException(status_code=404, detail=f'Course with id {course_id} not found')
+
+            files = db.query(File).filter(File.course_id == course_id).all()
+            return ResponseModel(
+                status=ResponseStatus.SUCCESS,
+                data=[FileResponseSchema.model_validate(file) for file in files],
+            )
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail='Failed to fetch files for course.')
 
     def get_file_by_id(self, db: Session, file_id: str) -> ResponseModel[FileResponseSchema]:
         file = db.query(File).filter(File.file_id == file_id).first()
