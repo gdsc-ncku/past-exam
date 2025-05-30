@@ -45,12 +45,20 @@ export interface SearchResponse {
   timestamp: string;
 }
 
+export interface CourseResponse {
+  status: 'success' | 'error';
+  data: Course;
+  total: number | null;
+  message: string | null;
+  timestamp: string | null;
+}
+
 export const courseAPI = {
   searchCourses: (params: CourseSearchParams) => {
     return axiosInstance.get<SearchResponse>('/v1/course/search', { params });
   },
 
   getCourse: (courseId: string) => {
-    return axiosInstance.get<SearchResponse>(`/v1/course/${courseId}`);
+    return axiosInstance.get<CourseResponse>(`/v1/course/${courseId}`);
   },
 };

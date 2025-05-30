@@ -72,7 +72,7 @@ export default function UserLayout({
             <Button
               variant="link"
               className="text-large-content"
-              onClick={() => router.push('/user/setting')}
+              onClick={() => router.push('/user')}
             >
               個人設定
             </Button>

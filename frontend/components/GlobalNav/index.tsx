@@ -59,7 +59,7 @@ export const GlobalNav = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               className="flex items-center gap-2 hover:bg-primary-50"
-              onClick={() => router.push('/upload')}
+              onClick={() => router.push('/user/upload')}
             >
               <Icon name="upload" size={30} /> 上傳過的考古題
             </DropdownMenuItem>
