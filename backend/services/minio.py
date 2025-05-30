@@ -41,8 +41,8 @@ class MinioService:
             )
             return url.replace(settings.minio_endpoint, settings.minio_public_endpoint)
         except S3Error as e:
-            print(f'Error getting presigned URL: {e}')
-            return False
+            print(f'Error getting presigned URL for bucket={bucket_name}, object={object_name}: {e}')
+            return None
 
     def delete_file(self, bucket_name: str, object_name: str):
         try:

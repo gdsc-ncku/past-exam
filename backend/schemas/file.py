@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from models.file import ExamType
+
 
 class FileBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -10,6 +12,9 @@ class FileBase(BaseModel):
     file_location: str
     user_id: str
     course_id: Optional[str] = None
+    exam_type: ExamType = ExamType.OTHERS
+    info: Optional[str] = None
+    anonymous: bool = False
 
 
 class FileCreate(BaseModel):
@@ -18,6 +23,9 @@ class FileCreate(BaseModel):
     filename: str
     user_id: str
     course_id: Optional[str] = None
+    exam_type: ExamType = ExamType.OTHERS
+    info: Optional[str] = None
+    anonymous: bool = False
 
 
 class FileResponse(FileBase):

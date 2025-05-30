@@ -9,6 +9,7 @@ from schemas.common import ResponseModel
 from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
 from services.auth import JWTService
+from models.file import ExamType
 
 router = APIRouter(tags=['file'], prefix='/api/v1/file')
 
@@ -25,10 +26,8 @@ async def read_all_file(token: str | None = Cookie(default=None), db: Session = 
 @router.get('/course/{course_id}', response_model=ResponseModel[List[FileResponseSchema]])
 async def get_files_by_course(
     course_id: str,
-    token: str | None = Cookie(default=None), 
     db: Session = Depends(get_db)
 ):
-    jwt_service.verify_token(token)  # Verify user is authenticated
     return file_crud.get_files_by_course(db, course_id)
 
 
@@ -37,6 +36,9 @@ async def create_file(
     upload_file: UploadFile = File(...),
     file_name: str = Form(...),
     course_id: Optional[str] = Form(None),
+    exam_type: ExamType = Form(ExamType.OTHERS),
+    info: Optional[str] = Form(None),
+    anonymous: bool = Form(False),
     token: str | None = Cookie(default=None),
     db: Session = Depends(get_db),
 ):
@@ -44,7 +46,10 @@ async def create_file(
     file_data = FileCreateSchema(
         filename=file_name, 
         user_id=user['user_id'],
-        course_id=course_id
+        course_id=course_id,
+        exam_type=exam_type,
+        info=info,
+        anonymous=anonymous
     )
     return await file_crud.create_file(db, file_data, upload_file)
 

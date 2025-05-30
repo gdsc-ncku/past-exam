@@ -66,12 +66,20 @@ class FileCRUD:
                 raise HTTPException(status_code=500, detail='Failed to save file.')
 
             try:
+                # The file_url format is: /bucket_name/user_id/file_id
+                # We need to store user_id/file_id as the object name
+                url_parts = file_url.strip('/').split('/')
+                object_name = '/'.join(url_parts[1:])  # Skip bucket name, keep user_id/file_id
+                
                 db_file = File(
                     filename=file_data.filename,
-                    file_location='/'.join(file_url.split('/')[2:]),
+                    file_location=object_name,
                     user_id=file_data.user_id,
                     file_id=file_url.split('/')[-1],
                     course_id=file_data.course_id,
+                    exam_type=file_data.exam_type,
+                    info=file_data.info,
+                    anonymous=file_data.anonymous,
                 )
 
                 db.add(db_file)
@@ -134,6 +142,10 @@ class FileCRUD:
             object_name=file.file_location,
             expires=3600,  # URL expires in 1 hour
         )
+        
+        if not presigned_url:
+            print(f"Failed to generate presigned URL for file {file_id}, bucket: {self.settings.minio_file_bucket}, object: {file.file_location}")
+            raise HTTPException(status_code=500, detail='Failed to generate file access URL')
 
         # Create a copy of the file data with the temporary URL
         file_data = FileResponseSchema.model_validate(file)
