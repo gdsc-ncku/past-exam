@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 
 # Enable corepack and install the specific pnpm version
-RUN corepack enable && corepack prepare pnpm@8.2.0 --activate
+RUN corepack enable && corepack prepare pnpm@9.9.0 --activate
 
 RUN pnpm install
 
