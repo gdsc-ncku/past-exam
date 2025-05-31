@@ -128,16 +128,15 @@ class FileCRUD:
                 files_data = []
                 for file in files:
                     file_dict = {
-                        "id": str(file.id),
+                        "file_id": file.file_id,
                         "filename": file.filename,
                         "file_location": file.file_location,
                         "user_id": str(file.user_id),
-                        "file_id": file.file_id,
                         "course_id": str(file.course_id) if file.course_id else None,
                         "exam_type": file.exam_type,
                         "info": file.info,
                         "anonymous": file.anonymous,
-                        "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                        "timestamp": file.timestamp.isoformat() if file.timestamp else None
                     }
                     files_data.append(file_dict)
                 cache.set_user_files_cache(user_id, files_data)
@@ -173,16 +172,15 @@ class FileCRUD:
                 files_data = []
                 for file in files:
                     file_dict = {
-                        "id": str(file.id),
+                        "file_id": file.file_id,
                         "filename": file.filename,
                         "file_location": file.file_location,
                         "user_id": str(file.user_id),
-                        "file_id": file.file_id,
                         "course_id": str(file.course_id) if file.course_id else None,
                         "exam_type": file.exam_type,
                         "info": file.info,
                         "anonymous": file.anonymous,
-                        "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                        "timestamp": file.timestamp.isoformat() if file.timestamp else None
                     }
                     files_data.append(file_dict)
                 cache.set_course_files_cache(course_id, files_data)
@@ -241,16 +239,15 @@ class FileCRUD:
             # Cache the result (without the presigned URL)
             if cache:
                 file_dict = {
-                    "id": str(file.id),
+                    "file_id": file.file_id,
                     "filename": file.filename,
                     "file_location": file.file_location,  # Store original path, not presigned URL
                     "user_id": str(file.user_id),
-                    "file_id": file.file_id,
                     "course_id": str(file.course_id) if file.course_id else None,
                     "exam_type": file.exam_type,
                     "info": file.info,
                     "anonymous": file.anonymous,
-                    "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                    "timestamp": file.timestamp.isoformat() if file.timestamp else None
                 }
                 cache.set_file_cache(file_id, file_dict)
 

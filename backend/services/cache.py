@@ -8,16 +8,33 @@ settings = get_settings()
 
 class CacheService:
     def __init__(self):
-        self.redis_client = redis.Redis(
-            host=settings.redis_host,
-            port=settings.redis_port,
-            password=settings.redis_password,
-            db=settings.redis_db,
-            decode_responses=True
-        )
+        self.redis_client = None
+        self.redis_available = False
+        
+        try:
+            self.redis_client = redis.Redis(
+                host=settings.redis_host,
+                port=settings.redis_port,
+                password=settings.redis_password if settings.redis_password else None,
+                db=settings.redis_db,
+                decode_responses=True,
+                socket_connect_timeout=5,  # 5 second timeout
+                socket_timeout=5
+            )
+            # Test the connection
+            self.redis_client.ping()
+            self.redis_available = True
+            print("Redis connection established successfully")
+        except Exception as e:
+            print(f"Redis connection failed: {e}. Cache will be disabled.")
+            self.redis_available = False
+            self.redis_client = None
 
     def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
+        if not self.redis_available:
+            return None
+            
         try:
             value = self.redis_client.get(key)
             if value:
@@ -29,6 +46,9 @@ class CacheService:
 
     def set(self, key: str, value: Any, expire: int = 3600) -> bool:
         """Set value in cache with expiration time in seconds"""
+        if not self.redis_available:
+            return False
+            
         try:
             serialized_value = json.dumps(value, default=str)
             return self.redis_client.setex(key, expire, serialized_value)
@@ -38,6 +58,9 @@ class CacheService:
 
     def delete(self, key: str) -> bool:
         """Delete key from cache"""
+        if not self.redis_available:
+            return False
+            
         try:
             return bool(self.redis_client.delete(key))
         except Exception as e:
@@ -46,6 +69,9 @@ class CacheService:
 
     def delete_pattern(self, pattern: str) -> int:
         """Delete all keys matching pattern"""
+        if not self.redis_available:
+            return 0
+            
         try:
             keys = self.redis_client.keys(pattern)
             if keys:
@@ -57,6 +83,9 @@ class CacheService:
 
     def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
+        if not self.redis_available:
+            return False
+            
         try:
             return bool(self.redis_client.exists(key))
         except Exception as e:

@@ -24,6 +24,15 @@ class Settings(BaseSettings):
     jwt_algorithm: str
     jwt_access_token_expire_minutes: str
     frontend_url: str
+    
+    # Redis settings (optional for graceful fallback)
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = ""
+    redis_db: int = 0
+
+    class Config:
+        env_file = '.env'
 
 
 @lru_cache

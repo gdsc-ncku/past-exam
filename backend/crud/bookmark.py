@@ -123,16 +123,15 @@ class BookmarkCRUD:
                 bookmarks_data = []
                 for file in user.bookmarked_files:
                     bookmark_dict = {
-                        "id": str(file.id),
+                        "file_id": file.file_id,
                         "filename": file.filename,
                         "file_location": file.file_location,
                         "user_id": str(file.user_id),
-                        "file_id": file.file_id,
                         "course_id": str(file.course_id) if file.course_id else None,
                         "exam_type": file.exam_type,
                         "info": file.info,
                         "anonymous": file.anonymous,
-                        "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                        "timestamp": file.timestamp.isoformat() if file.timestamp else None
                     }
                     bookmarks_data.append(bookmark_dict)
                 cache.set_user_bookmarks_cache(user_id, bookmarks_data)
