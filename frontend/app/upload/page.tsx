@@ -15,10 +15,67 @@ import {
 import { Textarea } from '@/ui/Textarea';
 import { Card } from '@/ui/Card';
 import { toast } from 'sonner';
-import { Upload, FileText, X } from 'lucide-react';
+import { Upload, FileText, X, LogIn, UserCheck } from 'lucide-react';
 import { z } from 'zod';
 import { CourseSearchSelector } from '@/app/components/CourseSearchSelector';
 import { uploadAPI } from '@/module/api/upload';
+import { useAuthentication } from '@/hooks/useAuthentication';
+
+// Simple Modal Component
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+const Modal = ({ isOpen, onClose, children }: ModalProps) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black bg-opacity-50"
+        onClick={onClose}
+      />
+
+      {/* Modal Content */}
+      <div className="relative z-10 mx-4 w-full max-w-md">{children}</div>
+    </div>
+  );
+};
+
+// Login Modal Component
+interface LoginModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLogin: () => void;
+}
+
+const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <Card className="p-6">
+        <div className="text-center">
+          <LogIn className="mx-auto mb-4 h-12 w-12 text-primary-600" />
+          <h2 className="mb-2 text-xl font-bold text-gray-900">需要登入</h2>
+          <p className="mb-6 text-gray-600">
+            您需要登入後才能上傳考古題檔案。請先登入或註冊帳號以繼續。
+          </p>
+          <div className="flex space-x-3">
+            <Button onClick={onLogin} className="flex-1">
+              <LogIn className="mr-2 h-4 w-4" />
+              登入
+            </Button>
+            <Button variant="secondary" onClick={onClose} className="flex-1">
+              稍後再說
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </Modal>
+  );
+};
 
 const uploadSchema = z.object({
   year: z.string().min(1, '年份為必填'),
@@ -53,18 +110,27 @@ const validateFile = (file: File | null): string | null => {
     return '檔案大小不得超過 10MB';
   }
 
-  // Check file type
-  const allowedTypes = [
+  // Get file extension from filename
+  const fileName = file.name.toLowerCase();
+  const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
+  const fileExtension = allowedExtensions.find((ext) => fileName.endsWith(ext));
+
+  if (!fileExtension) {
+    return '僅支援 PDF、Word 文件(.doc, .docx)或文字檔案(.txt)';
+  }
+
+  // Additional MIME type validation for extra security
+  const allowedMimeTypes = [
     'application/pdf',
-    'image/jpeg',
-    'image/png',
-    'image/jpg',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'text/plain', // .txt
   ];
 
-  if (!allowedTypes.includes(file.type)) {
-    return '僅支援 PDF、Word 文件或圖片檔案';
+  // Some browsers might not set correct MIME type, so we're more lenient
+  // but we'll primarily rely on file extension
+  if (file.type && !allowedMimeTypes.includes(file.type) && file.type !== '') {
+    return '檔案類型不符合要求，請確認檔案格式正確';
   }
 
   return null;
@@ -73,6 +139,7 @@ const validateFile = (file: File | null): string | null => {
 function UploadForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { currentUser, handleLogin } = useAuthentication();
   const [formData, setFormData] = useState({
     year: '',
     courseId: '',
@@ -87,6 +154,30 @@ function UploadForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Show login modal for non-authenticated users
+  useEffect(() => {
+    // Small delay to ensure auth state is settled
+    const timer = setTimeout(() => {
+      setAuthChecked(true);
+      if (!currentUser) {
+        setShowLoginModal(true);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentUser]);
+
+  const handleLoginClick = () => {
+    setShowLoginModal(false);
+    handleLogin(); // Use the Google OAuth login from navigation
+  };
+
+  const handleCloseModal = () => {
+    setShowLoginModal(false);
+  };
 
   // Pre-fill form with URL parameters
   useEffect(() => {
@@ -96,7 +187,7 @@ function UploadForm() {
     const instructor = searchParams.get('instructor');
 
     if (courseId && courseName && courseCode && instructor) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         courseId,
         courseName,
@@ -239,6 +330,13 @@ function UploadForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check authentication before allowing submission
+    if (!currentUser) {
+      setShowLoginModal(true);
+      toast.error('請先登入後再上傳檔案');
+      return;
+    }
+
     if (!validateForm()) {
       toast.error('請檢查表單內容');
       return;
@@ -326,13 +424,51 @@ function UploadForm() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={handleCloseModal}
+        onLogin={handleLoginClick}
+      />
+
+      {/* Auth Status Indicator */}
+      {authChecked && (
+        <div className="mb-4">
+          {currentUser ? (
+            <div className="flex items-center text-sm text-green-600">
+              <UserCheck className="mr-2 h-4 w-4" />
+              已登入，可以上傳檔案
+            </div>
+          ) : (
+            <div className="flex items-center text-sm text-amber-600">
+              <LogIn className="mr-2 h-4 w-4" />
+              未登入，請先登入後再上傳檔案
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold">上傳試題檔案</h1>
         <p className="text-gray-600">請填寫以下資訊並上傳您的試題檔案</p>
       </div>
 
-      <Card className="p-8">
+      <Card className={`relative p-8 ${!currentUser ? 'opacity-75' : ''}`}>
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Overlay for non-authenticated users */}
+          {authChecked && !currentUser && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white bg-opacity-50">
+              <div className="p-6 text-center">
+                <LogIn className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+                <p className="text-lg text-gray-600">請先登入以使用上傳功能</p>
+                <Button onClick={handleLoginClick} className="mt-4">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  登入
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
             {/* Left Column - Form Fields */}
@@ -523,10 +659,10 @@ function UploadForm() {
               {/* File Upload */}
               <div className="space-y-2">
                 <Label htmlFor="file">上傳檔案 *</Label>
-                <div 
+                <div
                   className={`mt-1 flex min-h-[300px] justify-center rounded-lg border-2 border-dashed px-6 pb-8 pt-8 transition-colors ${
-                    isDragOver 
-                      ? 'border-primary-400 bg-primary-50/50' 
+                    isDragOver
+                      ? 'border-primary-400 bg-primary-50/50'
                       : 'border-gray-300 hover:border-gray-400'
                   } ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                   onDragOver={handleDragOver}
@@ -558,11 +694,13 @@ function UploadForm() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center space-y-4">
-                        <Upload className={`h-16 w-16 transition-colors ${isDragOver ? 'text-primary-600' : 'text-gray-400'}`} />
+                        <Upload
+                          className={`h-16 w-16 transition-colors ${isDragOver ? 'text-primary-600' : 'text-gray-400'}`}
+                        />
                         <div className="text-center">
                           <label
                             htmlFor="file-upload"
-                            className="relative cursor-pointer rounded-md bg-white font-medium text-primary-500 hover:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500"
+                            className="relative cursor-pointer rounded-md bg-white font-medium text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500 hover:text-primary-400"
                           >
                             <span className="text-lg">選擇檔案</span>
                             <input
@@ -571,11 +709,13 @@ function UploadForm() {
                               type="file"
                               className="sr-only"
                               onChange={handleFileChange}
-                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              accept=".pdf,.doc,.docx,.txt"
                               disabled={loading}
                             />
                           </label>
-                          <p className={`mt-2 transition-colors ${isDragOver ? 'text-primary-600 font-medium' : 'text-gray-500'}`}>
+                          <p
+                            className={`mt-2 transition-colors ${isDragOver ? 'font-medium text-primary-600' : 'text-gray-500'}`}
+                          >
                             {isDragOver ? '放開以上傳檔案' : '或拖拽檔案到此處'}
                           </p>
                         </div>
@@ -584,7 +724,7 @@ function UploadForm() {
                             支援檔案類型：
                           </p>
                           <p className="mt-1 text-xs text-gray-400">
-                            PDF、Word 文件、JPG、PNG
+                            PDF、Word 文件(.doc, .docx)、文字檔案(.txt)
                           </p>
                           <p className="text-xs text-gray-400">
                             最大檔案大小：10MB
@@ -607,6 +747,7 @@ function UploadForm() {
                 <ul className="space-y-1 text-xs text-gray-700">
                   <li>• 請確保檔案內容清晰可讀</li>
                   <li>• 建議使用 PDF 格式以確保格式不變</li>
+                  <li>• 僅接受 PDF、Word 文件(.doc, .docx)及文字檔案(.txt)</li>
                   <li>• 請勿上傳包含個人敏感資訊的檔案</li>
                   <li>• 上傳前請確認檔案內容符合學術規範</li>
                 </ul>
