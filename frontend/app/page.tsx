@@ -11,6 +11,7 @@ import {
   BookOpen,
   Users,
   Share2,
+  Scale,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -72,7 +73,7 @@ export default function Page() {
               variants={fadeInUp}
               className="mx-auto max-w-3xl text-xl font-light leading-relaxed text-[#595959] sm:text-2xl"
             >
-              成大知識共享平台是一個專為成大師生打造的資源交流平台，希望消除因知識壟斷而造成的資訊不透明，促進平等、知識共享與開源的願景。
+              成大知識共享平台是一個專為成大學生打造的資源交流平台，希望消除因知識壟斷而造成的資訊不透明，促進平等、知識共享與開源的願景。
             </motion.p>
           </motion.div>
         </div>
@@ -97,13 +98,13 @@ export default function Page() {
             {
               icon: Users,
               title: '社群協作',
-              description: '凝聚師生力量，共同打造開放學習環境',
+              description: '凝聚學生力量，共同打造開放學習環境',
               gradient: 'from-[#E6FF95] to-[#CFFF4C]',
             },
             {
-              icon: Share2,
-              title: '開源精神',
-              description: '秉持開源理念，推動教育資源的透明與共享',
+              icon: Scale,
+              title: '平等互助',
+              description: '打破資訊不對等，建立互助共好的學習環境',
               gradient: 'from-[#CFFF4C] to-[#E6FF95]',
             },
           ].map((feature, index) => (
@@ -189,7 +190,7 @@ export default function Page() {
             </motion.h3>
             <motion.div variants={staggerContainer} className="flex space-x-8">
               {[
-                { icon: Github, href: 'https://github.com/your-repo' },
+                { icon: Github, href: 'https://github.com/gdsc-ncku/past-exam' },
                 { icon: Mail, href: 'mailto:your-email@example.com' },
               ].map((item, index) => (
                 <motion.a

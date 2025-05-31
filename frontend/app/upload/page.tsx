@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/ui/Button';
 import { Input } from '@/ui/Input';
 import { Label } from '@/ui/Label';
@@ -70,8 +70,9 @@ const validateFile = (file: File | null): string | null => {
   return null;
 };
 
-export default function UploadPage() {
+function UploadForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     year: '',
     courseId: '',
@@ -85,6 +86,25 @@ export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Pre-fill form with URL parameters
+  useEffect(() => {
+    const courseId = searchParams.get('courseId');
+    const courseName = searchParams.get('courseName');
+    const courseCode = searchParams.get('courseCode');
+    const instructor = searchParams.get('instructor');
+
+    if (courseId && courseName && courseCode && instructor) {
+      setFormData(prev => ({
+        ...prev,
+        courseId,
+        courseName,
+        courseCode,
+        instructor,
+      }));
+    }
+  }, [searchParams]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -121,6 +141,57 @@ export default function UploadPage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const fileError = validateFile(file);
+      if (fileError) {
+        toast.error(fileError);
+        return;
+      }
+
+      setSelectedFile(file);
+      if (errors.file) {
+        setErrors((prev) => ({ ...prev, file: '' }));
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!loading) {
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!loading) {
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set drag over to false if we're leaving the drop zone entirely
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setIsDragOver(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    if (loading) return;
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
       const fileError = validateFile(file);
       if (fileError) {
         toast.error(fileError);
@@ -452,7 +523,17 @@ export default function UploadPage() {
               {/* File Upload */}
               <div className="space-y-2">
                 <Label htmlFor="file">上傳檔案 *</Label>
-                <div className="mt-1 flex min-h-[300px] justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 pb-8 pt-8 transition-colors hover:border-gray-400">
+                <div 
+                  className={`mt-1 flex min-h-[300px] justify-center rounded-lg border-2 border-dashed px-6 pb-8 pt-8 transition-colors ${
+                    isDragOver 
+                      ? 'border-primary-400 bg-primary-50/50' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  } ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <div className="space-y-2 text-center">
                     {selectedFile ? (
                       <div className="flex flex-col items-center space-y-4">
@@ -477,11 +558,11 @@ export default function UploadPage() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center space-y-4">
-                        <Upload className="h-16 w-16 text-gray-400" />
+                        <Upload className={`h-16 w-16 transition-colors ${isDragOver ? 'text-primary-600' : 'text-gray-400'}`} />
                         <div className="text-center">
                           <label
                             htmlFor="file-upload"
-                            className="relative cursor-pointer rounded-md bg-white font-medium text-blue-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500"
+                            className="relative cursor-pointer rounded-md bg-white font-medium text-primary-500 hover:text-primary-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500"
                           >
                             <span className="text-lg">選擇檔案</span>
                             <input
@@ -494,7 +575,9 @@ export default function UploadPage() {
                               disabled={loading}
                             />
                           </label>
-                          <p className="mt-2 text-gray-500">或拖拽檔案到此處</p>
+                          <p className={`mt-2 transition-colors ${isDragOver ? 'text-primary-600 font-medium' : 'text-gray-500'}`}>
+                            {isDragOver ? '放開以上傳檔案' : '或拖拽檔案到此處'}
+                          </p>
                         </div>
                         <div className="text-center">
                           <p className="text-sm text-gray-500">
@@ -517,11 +600,11 @@ export default function UploadPage() {
               </div>
 
               {/* Upload Tips */}
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <h3 className="mb-2 text-sm font-medium text-blue-800">
+              <div className="rounded-lg border border-gray-200  p-4">
+                <h3 className="mb-2 text-sm font-medium text-gray-800">
                   上傳提示
                 </h3>
-                <ul className="space-y-1 text-xs text-blue-700">
+                <ul className="space-y-1 text-xs text-gray-700">
                   <li>• 請確保檔案內容清晰可讀</li>
                   <li>• 建議使用 PDF 格式以確保格式不變</li>
                   <li>• 請勿上傳包含個人敏感資訊的檔案</li>
@@ -548,5 +631,13 @@ export default function UploadPage() {
         </form>
       </Card>
     </div>
+  );
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <UploadForm />
+    </Suspense>
   );
 }

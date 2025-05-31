@@ -16,6 +16,8 @@ import {
 } from '@/ui/MenuItem';
 import User from '@/types/user';
 import logoImage from '@/assets/images/logo.png';
+import { getAvatarUrl } from '@/lib/utils';
+
 export const GlobalNav = () => {
   const router = useRouter();
   const { currentUser, handleLogout, handleLogin, handleRefreshProfile } =
@@ -30,14 +32,14 @@ export const GlobalNav = () => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger>
-          {' '}
-          <Image
-            src={user.avatar}
-            alt="avatar"
-            width={32}
-            height={32}
-            className="h-full w-full rounded-full"
-          />
+          <div className="relative h-8 w-8 overflow-hidden rounded-full">
+            <Image
+              src={user.avatar ? getAvatarUrl(user.avatar) : '/default-avatar.svg'}
+              alt="avatar"
+              fill
+              className="object-cover"
+            />
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 bg-white">
           <DropdownMenuLabel className="whitespace-normal break-words">
@@ -53,7 +55,7 @@ export const GlobalNav = () => {
             </DropdownMenuItem>
             <DropdownMenuItem
               className="flex items-center gap-2 hover:bg-primary-50"
-              onClick={() => router.push('/bookmark')}
+              onClick={() => router.push('/user/bookmark')}
             >
               <Icon name="bookmark" size={30} /> 收藏的考古題
             </DropdownMenuItem>
@@ -84,14 +86,14 @@ export const GlobalNav = () => {
 
   return (
     <div className="fixed top-0 z-10 w-full border-b border-gray-800 lg:w-full lg:border-b-0 lg:border-r lg:border-gray-800">
-      <div className="flex w-full items-center justify-between px-16 py-4">
+      <div className="flex w-full items-center justify-between px-16 py-6">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
             className="hover:bg-transparent"
             onClick={() => router.push('/')}
           >
-            <Image src={logoImage} alt="logo" width={78} height={48} />
+            <Image src={logoImage} alt="logo" width={110} height={110} />
           </Button>
         </div>
         <div className="mr-16 flex items-center space-x-4">
@@ -106,7 +108,10 @@ export const GlobalNav = () => {
             </Button>
           </div>
           <div>
-            <Button variant="ghost" onClick={() => router.push('/about')}>
+            <Button
+              variant="ghost"
+              onClick={() => window.open('https://github.com/gdsc-ncku/past-exam', '_blank')}
+            >
               關於
             </Button>
           </div>

@@ -8,12 +8,14 @@ interface DepartmentSelectorProps {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export const DepartmentSelector = ({
   value,
   onChange,
   disabled,
+  className = '',
 }: DepartmentSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedAcademies, setExpandedAcademies] = useState<Set<string>>(
@@ -44,9 +46,10 @@ export const DepartmentSelector = ({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`flex w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm
+        className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm
           ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-gray-50'}
-          ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-300'}`}
+          ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : 'border-gray-300'}
+          ${className}`}
       >
         <span className="truncate">{selectedDept}</span>
         <ChevronDown

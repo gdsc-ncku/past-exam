@@ -2,7 +2,7 @@ const path = require('path');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.resolve.alias['@'] = path.resolve(__dirname);
 
     const fileLoaderRule = config.module.rules.find(
@@ -20,6 +20,21 @@ const nextConfig = {
       use: ['@svgr/webpack'],
     });
 
+    // PDF.js configuration
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      canvas: false,
+    };
+
+    // Handle PDF.js worker on client side
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        canvas: false,
+      };
+    }
+
     return config;
   },
   experimental: {
@@ -36,8 +51,14 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9000',
+        pathname: '/**',
+      },
     ],
-    domains: ['lh3.googleusercontent.com'],
+    domains: ['lh3.googleusercontent.com', 'localhost'],
   },
 };
 

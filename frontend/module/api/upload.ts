@@ -85,4 +85,13 @@ export const uploadAPI = {
       timestamp: string;
     }>('/v1/file');
   },
+
+  getFileById: (fileId: string) => {
+    return axiosInstance.get<{
+      status: string;
+      data: FileResponse | null;
+      message: string | null;
+      timestamp: string;
+    }>(`/v1/file/${fileId}`);
+  },
 };

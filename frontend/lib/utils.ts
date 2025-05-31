@@ -16,12 +16,35 @@ export const formatDate = (date: Date) => {
   });
 };
 
-export const downloadFile = async (fileLocation: string, filename: string) => {
-  try {
-    // Construct download URL using file server endpoint + file location
+export const getAvatarUrl = (avatarPath: string) => {
+  // Check if avatarPath is already a full URL
+  const isFullUrl = avatarPath.startsWith('http://') || avatarPath.startsWith('https://');
+  
+  if (isFullUrl) {
+    return avatarPath;
+  } else {
+    // Construct avatar URL using file server endpoint + avatar path
     const fileServerURL =
       process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
-    const downloadUrl = `${fileServerURL}/exam-files/${fileLocation}`;
+    return `${fileServerURL}${avatarPath}`;
+  }
+};
+
+export const downloadFile = async (fileLocation: string, filename: string) => {
+  try {
+    // Check if fileLocation is already a full URL
+    const isFullUrl = fileLocation.startsWith('http://') || fileLocation.startsWith('https://');
+    
+    let downloadUrl: string;
+    if (isFullUrl) {
+      // Use the fileLocation as-is if it's already a full URL
+      downloadUrl = fileLocation;
+    } else {
+      // Construct download URL using file server endpoint + file location
+      const fileServerURL =
+        process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
+      downloadUrl = `${fileServerURL}/exam-files/${fileLocation}`;
+    }
 
     // Fetch the file as a blob to ensure proper filename handling
     const response = await fetch(downloadUrl);
@@ -52,9 +75,17 @@ export const downloadFile = async (fileLocation: string, filename: string) => {
 
     // Fallback to direct link method if fetch fails
     try {
-      const fileServerURL =
-        process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
-      const downloadUrl = `${fileServerURL}/exam-files/${fileLocation}`;
+      // Check if fileLocation is already a full URL for fallback too
+      const isFullUrl = fileLocation.startsWith('http://') || fileLocation.startsWith('https://');
+      
+      let downloadUrl: string;
+      if (isFullUrl) {
+        downloadUrl = fileLocation;
+      } else {
+        const fileServerURL =
+          process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
+        downloadUrl = `${fileServerURL}/exam-files/${fileLocation}`;
+      }
 
       const link = document.createElement('a');
       link.href = downloadUrl;

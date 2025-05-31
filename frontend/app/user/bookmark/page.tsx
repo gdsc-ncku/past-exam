@@ -8,16 +8,14 @@ import {
   ArrowLeft,
   Download,
   FileText,
-  Calendar,
   Upload,
-  Trash2,
   Eye,
   Clock,
-  Star,
-  Bookmark,
   BookmarkCheck,
+  BookmarkX,
+  Heart,
 } from 'lucide-react';
-import { uploadAPI, FileResponse } from '@/module/api/upload';
+import { FileResponse } from '@/module/api/upload';
 import { courseAPI } from '@/module/api/course';
 import { bookmarkAPI } from '@/module/api/bookmark';
 import { downloadFile } from '@/lib/utils';
@@ -28,7 +26,6 @@ interface ExtendedFileResponse extends FileResponse {
   courseName?: string;
   courseCode?: string;
   departmentName?: string;
-  isBookmarked?: boolean;
 }
 
 const examTypeMap: { [key: string]: string } = {
@@ -63,84 +60,64 @@ const getFileIcon = (filename: string) => {
   return <FileText className="h-5 w-5 text-gray-500" />;
 };
 
-export default function UserUploadPage() {
+export default function UserBookmarkPage() {
   const router = useRouter();
   const [files, setFiles] = useState<ExtendedFileResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserFiles = async () => {
+    const fetchBookmarkedFiles = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch files uploaded by current user
-        const filesResponse = await uploadAPI.getFilesByUser();
+        // Fetch bookmarked files
+        const bookmarksResponse = await bookmarkAPI.getBookmarks();
 
-        if (filesResponse.data.status === 'success') {
-          const filesData = filesResponse.data.data || [];
+        if (bookmarksResponse.data.status === 'success') {
+          const filesData = bookmarksResponse.data.data || [];
 
-          // Enhance files with course information and bookmark status
+          // Enhance files with course information
           const enhancedFiles = await Promise.all(
             filesData.map(async (file) => {
               try {
-                // Fetch course info
-                const courseResponse = await courseAPI.getCourse(
-                  file.course_id,
-                );
-                let courseInfo = {};
-                if (
-                  courseResponse.data.status === 'success' &&
-                  courseResponse.data.data
-                ) {
-                  const course = courseResponse.data.data;
-                  courseInfo = {
-                    courseName: course.courseName,
-                    courseCode: `${course.departmentId}-${course.serialNumber}`,
-                    departmentName: course.departmentId,
-                  };
-                }
-
-                // Fetch bookmark status
-                let isBookmarked = false;
-                try {
-                  const bookmarkResponse = await bookmarkAPI.checkBookmarkStatus(file.file_id);
-                  if (bookmarkResponse.data.status === 'success' && bookmarkResponse.data.data) {
-                    isBookmarked = bookmarkResponse.data.data.is_bookmarked;
+                // Fetch course info if course_id exists
+                if (file.course_id) {
+                  const courseResponse = await courseAPI.getCourse(file.course_id);
+                  if (
+                    courseResponse.data.status === 'success' &&
+                    courseResponse.data.data
+                  ) {
+                    const course = courseResponse.data.data;
+                    return {
+                      ...file,
+                      courseName: course.courseName,
+                      courseCode: `${course.departmentId}-${course.serialNumber}`,
+                      departmentName: course.departmentId,
+                    };
                   }
-                } catch (bookmarkError) {
-                  console.error('Error fetching bookmark status:', bookmarkError);
                 }
-
-                return {
-                  ...file,
-                  ...courseInfo,
-                  isBookmarked,
-                };
               } catch (err) {
                 console.error('Error fetching course info:', err);
-                return {
-                  ...file,
-                  isBookmarked: false,
-                };
               }
+              return file;
             }),
           );
 
           setFiles(enhancedFiles);
         } else {
-          setError('無法載入檔案列表');
+          setError('無法載入收藏列表');
         }
       } catch (err) {
-        console.error('Error fetching user files:', err);
-        setError('載入檔案時發生錯誤');
+        console.error('Error fetching bookmarks:', err);
+        setError('載入收藏時發生錯誤');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserFiles();
+    fetchBookmarkedFiles();
   }, []);
 
   const handleDownload = async (file: ExtendedFileResponse) => {
@@ -151,24 +128,14 @@ export default function UserUploadPage() {
     router.push(`/course/${courseId}`);
   };
 
-  const handleBookmarkToggle = async (file: ExtendedFileResponse) => {
+  const handleRemoveBookmark = async (file: ExtendedFileResponse) => {
     try {
-      if (file.isBookmarked) {
-        await bookmarkAPI.removeBookmark(file.file_id);
-      } else {
-        await bookmarkAPI.addBookmark(file.file_id);
-      }
+      await bookmarkAPI.removeBookmark(file.file_id);
       
-      // Update local state
-      setFiles(prevFiles => 
-        prevFiles.map(f => 
-          f.file_id === file.file_id 
-            ? { ...f, isBookmarked: !f.isBookmarked }
-            : f
-        )
-      );
+      // Remove from local state
+      setFiles(prevFiles => prevFiles.filter(f => f.file_id !== file.file_id));
     } catch (error) {
-      console.error('Error toggling bookmark:', error);
+      console.error('Error removing bookmark:', error);
       // You could add a toast notification here
     }
   };
@@ -197,17 +164,17 @@ export default function UserUploadPage() {
             <span>返回</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">我的上傳</h1>
-            <p className="mt-1 text-gray-600">管理您上傳的考古題檔案</p>
+            <h1 className="text-3xl font-bold text-gray-900">我的收藏</h1>
+            <p className="mt-1 text-gray-600">查看您收藏的考古題檔案</p>
           </div>
         </div>
 
         <Button
-          onClick={() => router.push('/upload')}
+          onClick={() => router.push('/search')}
           className="flex items-center space-x-2"
         >
-          <Upload className="h-4 w-4" />
-          <span>上傳新檔案</span>
+          <Heart className="h-4 w-4" />
+          <span>尋找更多考古題</span>
         </Button>
       </div>
 
@@ -215,22 +182,20 @@ export default function UserUploadPage() {
       <Card className="mb-8 p-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           <div className="text-center">
+            <div className="text-3xl font-bold text-pink-600">{files.length}</div>
+            <div className="text-sm text-gray-500">總收藏數</div>
+          </div>
+          <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">
-              {files.length}
+              {files.filter((f) => f.exam_type === 'midterm').length}
             </div>
-            <div className="text-sm text-gray-500">總上傳數</div>
+            <div className="text-sm text-gray-500">期中考</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-green-600">
-              {files.filter((f) => !f.anonymous).length}
+              {files.filter((f) => f.exam_type === 'final').length}
             </div>
-            <div className="text-sm text-gray-500">公開檔案</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-orange-600">
-              {files.filter((f) => f.anonymous).length}
-            </div>
-            <div className="text-sm text-gray-500">匿名檔案</div>
+            <div className="text-sm text-gray-500">期末考</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-purple-600">
@@ -244,7 +209,7 @@ export default function UserUploadPage() {
       {/* Files List */}
       <Card className="p-8">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">上傳的檔案</h2>
+          <h2 className="text-2xl font-bold text-gray-900">收藏的檔案</h2>
           <div className="text-sm text-gray-500">{files.length} 個檔案</div>
         </div>
 
@@ -257,16 +222,16 @@ export default function UserUploadPage() {
           </div>
         ) : files.length === 0 ? (
           <div className="py-12 text-center">
-            <Upload className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+            <BookmarkCheck className="mx-auto mb-4 h-16 w-16 text-gray-400" />
             <h3 className="mb-2 text-lg font-medium text-gray-900">
-              尚未上傳任何檔案
+              尚未收藏任何檔案
             </h3>
             <p className="mb-6 text-gray-600">
-              開始上傳您的第一個考古題檔案，幫助其他同學學習！
+              開始瀏覽課程並收藏有用的考古題檔案！
             </p>
-            <Button onClick={() => router.push('/upload')}>
-              <Upload className="mr-2 h-4 w-4" />
-              上傳檔案
+            <Button onClick={() => router.push('/search')}>
+              <Heart className="mr-2 h-4 w-4" />
+              探索檔案
             </Button>
           </div>
         ) : (
@@ -304,9 +269,7 @@ export default function UserUploadPage() {
                         {/* Course Info */}
                         {file.courseName && (
                           <div className="mt-2 text-sm text-gray-600">
-                            <span className="font-medium">
-                              {file.courseCode}
-                            </span>{' '}
+                            <span className="font-medium">{file.courseCode}</span>{' '}
                             {file.courseName}
                           </div>
                         )}
@@ -317,17 +280,19 @@ export default function UserUploadPage() {
 
                 {/* Action Buttons */}
                 <div className="ml-4 flex items-center space-x-2">
-                  <Button
-                    variant="secondary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewCourse(file.course_id);
-                    }}
-                    className="flex items-center space-x-1"
-                  >
-                    <Eye className="h-3 w-3" />
-                    <span>查看課程</span>
-                  </Button>
+                  {file.course_id && (
+                    <Button
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewCourse(file.course_id);
+                      }}
+                      className="flex items-center space-x-1"
+                    >
+                      <Eye className="h-3 w-3" />
+                      <span>查看課程</span>
+                    </Button>
+                  )}
 
                   <Button
                     variant="secondary"
@@ -344,15 +309,11 @@ export default function UserUploadPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleBookmarkToggle(file);
+                      handleRemoveBookmark(file);
                     }}
-                    className="p-2 text-gray-400 transition-colors hover:text-yellow-500"
+                    className="p-2 text-gray-400 transition-colors hover:text-red-500"
                   >
-                    {file.isBookmarked ? (
-                      <Bookmark className="h-5 w-5 fill-yellow-500 text-yellow-500" />
-                    ) : (
-                      <Bookmark className="h-5 w-5" />
-                    )}
+                    <BookmarkX className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -362,4 +323,4 @@ export default function UserUploadPage() {
       </Card>
     </div>
   );
-}
+} 

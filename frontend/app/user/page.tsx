@@ -3,7 +3,7 @@ import { useAuthentication } from '@/hooks/useAuthentication';
 import { Input } from '@/ui/Input';
 import { Label } from '@/ui/Label';
 import { Button } from '@/ui/Button';
-import Image from 'next/image';
+import { AvatarUpload } from '@/app/components/AvatarUpload';
 import { useState, useEffect } from 'react';
 import { z } from 'zod';
 import { userAPI } from '@/module/api';
@@ -47,6 +47,11 @@ export default function SettingPage() {
     } else {
       toast('修改失敗');
     }
+  };
+
+  const handleAvatarUpdate = (newAvatarUrl: string) => {
+    // Refresh user profile to get updated avatar
+    handleRefreshProfile();
   };
 
   return (
@@ -94,18 +99,10 @@ export default function SettingPage() {
         </div>
         <div className="w-1/2">
           <div className="flex h-full flex-col items-center gap-4">
-            <div className="relative">
-              <Image
-                src={currentUser?.avatar || ''}
-                alt="user"
-                width={250}
-                height={250}
-                className="rounded-lg"
-              />
-              <button className="absolute inset-x-0 bottom-0 flex h-1/5 items-center justify-center bg-black/30 text-white transition-opacity duration-200">
-                更換頭像
-              </button>
-            </div>
+            <AvatarUpload
+              currentAvatar={currentUser?.avatar || ''}
+              onAvatarUpdate={handleAvatarUpdate}
+            />
           </div>
         </div>
       </div>

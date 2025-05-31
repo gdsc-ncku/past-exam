@@ -16,9 +16,11 @@ import {
   Users,
   Star,
   Clock,
+  Bookmark,
 } from 'lucide-react';
 import { courseAPI, Course } from '@/module/api/course';
 import { uploadAPI, FileResponse } from '@/module/api/upload';
+import { bookmarkAPI } from '@/module/api/bookmark';
 import { getDepartmentInfo } from '@/module/data/departments';
 import { downloadFile } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
@@ -27,8 +29,9 @@ interface CoursePageParams {
   courseId: string;
 }
 
-// Extended file interface for better display
+// Extended file interface with bookmark status
 interface ExtendedFileResponse extends FileResponse {
+  isBookmarked?: boolean;
   year?: string;
   examScope?: string;
   courseName?: string;
@@ -71,9 +74,8 @@ const getFileIcon = (filename: string) => {
 export default function CoursePage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = Array.isArray(params.courseId)
-    ? params.courseId[0]
-    : params.courseId;
+  const courseId = params.courseId as string;
+
   const [course, setCourse] = useState<Course | null>(null);
   const [files, setFiles] = useState<ExtendedFileResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,18 +90,14 @@ export default function CoursePage() {
 
         // Fetch course details
         const courseResponse = await courseAPI.getCourse(courseId);
-
-        if (
-          courseResponse.data.status === 'success' &&
-          courseResponse.data.data
-        ) {
+        if (courseResponse.data.status === 'success' && courseResponse.data.data) {
           setCourse(courseResponse.data.data);
         } else {
-          setError('找不到課程資訊');
+          setError('無法載入課程資訊');
         }
       } catch (err) {
         console.error('Error fetching course:', err);
-        setError('載入課程資訊時發生錯誤');
+        setError('載入課程時發生錯誤');
       } finally {
         setLoading(false);
       }
@@ -108,29 +106,68 @@ export default function CoursePage() {
     const fetchFiles = async () => {
       try {
         setFilesLoading(true);
-
+        
         // Fetch files for this course
         const filesResponse = await uploadAPI.getFilesByCourse(courseId);
-
         if (filesResponse.data.status === 'success') {
-          setFiles(filesResponse.data.data || []);
+          const filesData = filesResponse.data.data || [];
+          
+          // Enhance files with bookmark status
+          const enhancedFiles = await Promise.all(
+            filesData.map(async (file) => {
+              let isBookmarked = false;
+              try {
+                const bookmarkResponse = await bookmarkAPI.checkBookmarkStatus(file.file_id);
+                if (bookmarkResponse.data.status === 'success' && bookmarkResponse.data.data) {
+                  isBookmarked = bookmarkResponse.data.data.is_bookmarked;
+                }
+              } catch (bookmarkError) {
+                console.error('Error fetching bookmark status:', bookmarkError);
+              }
+              
+              return {
+                ...file,
+                isBookmarked,
+              };
+            })
+          );
+          
+          setFiles(enhancedFiles);
         }
       } catch (err) {
         console.error('Error fetching files:', err);
-        // Don't set error for files, just show empty state
       } finally {
         setFilesLoading(false);
       }
     };
 
-    if (courseId) {
-      fetchCourseData();
-      fetchFiles();
-    }
+    fetchCourseData();
+    fetchFiles();
   }, [courseId]);
 
   const handleDownload = async (file: ExtendedFileResponse) => {
     await downloadFile(file.file_location, file.filename);
+  };
+
+  const handleBookmarkToggle = async (file: ExtendedFileResponse) => {
+    try {
+      if (file.isBookmarked) {
+        await bookmarkAPI.removeBookmark(file.file_id);
+      } else {
+        await bookmarkAPI.addBookmark(file.file_id);
+      }
+      
+      // Update local state
+      setFiles(prevFiles => 
+        prevFiles.map(f => 
+          f.file_id === file.file_id 
+            ? { ...f, isBookmarked: !f.isBookmarked }
+            : f
+        )
+      );
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    }
   };
 
   if (loading) {
@@ -263,7 +300,24 @@ export default function CoursePage() {
       <Card className="p-8">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">考古題檔案</h2>
-          <div className="text-sm text-gray-500">{files.length} 個檔案</div>
+          <div className="flex items-center space-x-4">
+            <div className="text-sm text-gray-500">{files.length} 個檔案</div>
+            <Button
+              onClick={() => {
+                const params = new URLSearchParams({
+                  courseId: course.course_id,
+                  courseName: course.courseName,
+                  courseCode: `${course.departmentId}-${course.serialNumber}`,
+                  instructor: course.instructors,
+                });
+                router.push(`/upload?${params.toString()}`);
+              }}
+              className="flex items-center space-x-2"
+            >
+              <FileText className="h-4 w-4" />
+              <span>上傳檔案</span>
+            </Button>
+          </div>
         </div>
 
         {filesLoading ? (
@@ -277,7 +331,15 @@ export default function CoursePage() {
             <p className="mb-6 text-gray-600">
               此課程目前還沒有上傳的考古題檔案。
             </p>
-            <Button onClick={() => router.push('/upload')}>
+            <Button onClick={() => {
+              const params = new URLSearchParams({
+                courseId: course.course_id,
+                courseName: course.courseName,
+                courseCode: `${course.departmentId}-${course.serialNumber}`,
+                instructor: course.instructors,
+              });
+              router.push(`/upload?${params.toString()}`);
+            }}>
               上傳第一個檔案
             </Button>
           </div>
@@ -286,7 +348,8 @@ export default function CoursePage() {
             {files.map((file) => (
               <div
                 key={file.file_id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50"
+                className="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 cursor-pointer"
+                onClick={() => router.push(`/file/${file.file_id}`)}
               >
                 <div className="flex items-center space-x-4">
                   {getFileIcon(file.filename)}
@@ -308,24 +371,37 @@ export default function CoursePage() {
                           </span>
                         </span>
                       )}
-                      {!file.anonymous && (
-                        <span className="text-gray-400">公開上傳</span>
-                      )}
-                      {file.anonymous && (
-                        <span className="text-gray-400">匿名上傳</span>
-                      )}
                     </div>
                   </div>
                 </div>
 
-                <Button
-                  variant="secondary"
-                  onClick={() => handleDownload(file)}
-                  className="flex items-center space-x-2"
-                >
-                  <Download className="h-4 w-4" />
-                  <span>下載</span>
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBookmarkToggle(file);
+                    }}
+                    className="p-2 text-gray-400 transition-colors hover:text-yellow-500"
+                  >
+                    {file.isBookmarked ? (
+                      <Bookmark className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                    ) : (
+                      <Bookmark className="h-5 w-5" />
+                    )}
+                  </button>
+
+                  <Button
+                    variant="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload(file);
+                    }}
+                    className="flex items-center space-x-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>下載</span>
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

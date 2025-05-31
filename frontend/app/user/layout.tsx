@@ -5,6 +5,9 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/ui/Button';
 import { Icon } from '@/ui/icons';
+import { getDepartmentInfo } from '@/module/data/departments';
+import { getAvatarUrl } from '@/lib/utils';
+
 export default function UserLayout({
   children,
 }: {
@@ -33,7 +36,7 @@ export default function UserLayout({
           <div className="mb-4 flex items-start space-x-4">
             <div className="relative flex h-24 w-24 items-center">
               <Image
-                src={currentUser?.avatar || ''}
+                src={currentUser?.avatar ? getAvatarUrl(currentUser.avatar) : '/default-avatar.svg'}
                 alt="Profile"
                 fill
                 className="rounded-full object-cover"
@@ -44,10 +47,9 @@ export default function UserLayout({
                 <div className="text-mb-4 text-h2">{currentUser?.userName}</div>
                 <div className="flex items-center space-x-2 text-secondary-500 text-subtle">
                   <Icon name="user" size={16} />
-                  科系{' '}
                   {currentUser?.department == null
-                    ? '尚未設定'
-                    : currentUser?.department}
+                    ? '科系尚未設定'
+                    : getDepartmentInfo(currentUser.department).name}
                 </div>
               </div>
             </div>

@@ -13,6 +13,7 @@ import {
   ChevronRight as ChevronRightIcon,
   ChevronFirst,
   ChevronLast,
+  Search,
 } from 'lucide-react';
 import { courseAPI, Course } from '@/module/api/course';
 import { getDepartmentInfo, ACADEMIES } from '@/module/data/departments';
@@ -86,6 +87,7 @@ function SearchContent() {
   const [hasSearched, setHasSearched] = useState(false);
   const [currentOffset, setCurrentOffset] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
+  const [activeTab, setActiveTab] = useState<'quick' | 'department'>('quick');
   const ITEMS_PER_PAGE = 10;
   const [localFilters, setLocalFilters] = useState({
     search_text: searchParams.get('search_text') || '',
@@ -215,24 +217,26 @@ function SearchContent() {
     return (
       <div className="mt-4 flex flex-col items-center space-y-2">
         <div className="flex items-center space-x-2">
-          <Button
-            variant="secondary"
-            onClick={() => handlePageClick(1)}
-            disabled={currentOffset === 0 || disabled}
-            className="h-8 px-2"
-            title="第一頁"
-          >
-            <ChevronFirst className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => handlePageClick(currentPage - 1)}
-            disabled={currentOffset === 0 || disabled}
-            className="h-8 px-2"
-            title="上一頁"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+          <div title="第一頁">
+            <ChevronFirst 
+              className={`h-6 w-6 cursor-pointer transition-colors ${
+                currentOffset === 0 || disabled
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+              onClick={() => !disabled && currentOffset !== 0 && handlePageClick(1)}
+            />
+          </div>
+          <div title="上一頁">
+            <ChevronLeft 
+              className={`h-6 w-6 cursor-pointer transition-colors ${
+                currentOffset === 0 || disabled
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+              onClick={() => !disabled && currentOffset !== 0 && handlePageClick(currentPage - 1)}
+            />
+          </div>
 
           <form
             onSubmit={handleInputSubmit}
@@ -252,24 +256,26 @@ function SearchContent() {
             </span>
           </form>
 
-          <Button
-            variant="secondary"
-            onClick={() => handlePageClick(currentPage + 1)}
-            disabled={currentOffset + ITEMS_PER_PAGE >= totalItems || disabled}
-            className="h-8 px-2"
-            title="下一頁"
-          >
-            <ChevronRightIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => handlePageClick(totalPages)}
-            disabled={currentOffset + ITEMS_PER_PAGE >= totalItems || disabled}
-            className="h-8 px-2"
-            title="最後一頁"
-          >
-            <ChevronLast className="h-4 w-4" />
-          </Button>
+          <div title="下一頁">
+            <ChevronRightIcon 
+              className={`h-6 w-6 cursor-pointer transition-colors ${
+                currentOffset + ITEMS_PER_PAGE >= totalItems || disabled
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+              onClick={() => !disabled && currentOffset + ITEMS_PER_PAGE < totalItems && handlePageClick(currentPage + 1)}
+            />
+          </div>
+          <div title="最後一頁">
+            <ChevronLast 
+              className={`h-6 w-6 cursor-pointer transition-colors ${
+                currentOffset + ITEMS_PER_PAGE >= totalItems || disabled
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : 'text-gray-600 hover:text-black'
+              }`}
+              onClick={() => !disabled && currentOffset + ITEMS_PER_PAGE < totalItems && handlePageClick(totalPages)}
+            />
+          </div>
         </div>
       </div>
     );
@@ -277,80 +283,157 @@ function SearchContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">課程搜尋</h1>
+      {/* Title and Subtitle */}
+      <div className="mb-8">
+        <h1 className="mb-4 text-4xl font-bold text-gray-900">成大知識共享平台</h1>
+        <p className="text-lg text-gray-600">檢索知識，從這裡開始！</p>
+      </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          // Update URL first with search parameters
-          const params = new URLSearchParams();
-          Object.entries(localFilters).forEach(([key, value]) => {
-            if (value && value !== 'all') {
-              params.set(key, value);
-            }
-          });
-          params.set('limit', ITEMS_PER_PAGE.toString());
-          params.set('offset', '0');
-          router.replace(`/search?${params.toString()}`, { scroll: false });
-          // Then perform search
-          handleSearch(e, 0);
-        }}
-        className="space-y-6"
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="search_text">搜尋文字</Label>
-              <Input
-                id="search_text"
-                value={localFilters.search_text}
-                onChange={(e) =>
-                  handleFilterChange('search_text', e.target.value)
-                }
-                placeholder="搜尋所有欄位..."
-                disabled={loading}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="departmentId">系所</Label>
-              <DepartmentSelector
-                value={localFilters.departmentId}
-                onChange={(value) => handleFilterChange('departmentId', value)}
-                disabled={loading}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              setLocalFilters({
-                search_text: '',
-                departmentId: 'all',
-              });
-              setSearchResults([]);
-              router.push('/search');
-            }}
-            disabled={loading}
+      {/* Search Interface */}
+      <div className="mb-8">
+        {/* Search Tabs */}
+        <div className="mb-6 flex space-x-8">
+          <button
+            onClick={() => setActiveTab('quick')}
+            className={`pb-2 text-lg font-medium transition-colors ${
+              activeTab === 'quick'
+                ? 'border-b-2 border-gray-900 text-gray-900'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
           >
-            清除篩選
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? (
-              <div className="flex items-center space-x-2">
-                <LoadingSpinner size="sm" />
-                <span>搜尋中...</span>
-              </div>
-            ) : (
-              '搜尋'
-            )}
-          </Button>
+            快速搜尋
+          </button>
+          <button
+            onClick={() => setActiveTab('department')}
+            className={`pb-2 text-lg font-medium transition-colors ${
+              activeTab === 'department'
+                ? 'border-b-2 border-gray-900 text-gray-900'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            依系所
+          </button>
         </div>
-      </form>
+
+        {/* Search Content */}
+        <div className="space-y-6">
+          {activeTab === 'quick' ? (
+            /* Quick Search */
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const params = new URLSearchParams();
+                if (localFilters.search_text) {
+                  params.set('search_text', localFilters.search_text);
+                }
+                params.set('limit', ITEMS_PER_PAGE.toString());
+                params.set('offset', '0');
+                router.replace(`/search?${params.toString()}`, { scroll: false });
+                handleSearch(e, 0);
+              }}
+              className="relative"
+            >
+              <div className="relative">
+                <input
+                  type="text"
+                  value={localFilters.search_text}
+                  onChange={(e) => handleFilterChange('search_text', e.target.value)}
+                  placeholder="輸入課程關鍵字/教授名/課程代碼......"
+                  className="w-full rounded-full border-2 border-gray-200 bg-gray-50 py-4 pl-6 pr-16 text-lg placeholder-gray-400 transition-colors focus:border-gray-300 focus:bg-white focus:outline-none"
+                  disabled={loading}
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#C3F53C] text-gray-800 transition-colors hover:bg-[#B8ED2F]"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+              </div>
+            </form>
+          ) : (
+            /* Department Search */
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const params = new URLSearchParams();
+                Object.entries(localFilters).forEach(([key, value]) => {
+                  if (value && value !== 'all') {
+                    params.set(key, value);
+                  }
+                });
+                params.set('limit', ITEMS_PER_PAGE.toString());
+                params.set('offset', '0');
+                router.replace(`/search?${params.toString()}`, { scroll: false });
+                handleSearch(e, 0);
+              }}
+              className="relative"
+            >
+              <div className="relative rounded-full border-2 border-gray-200 bg-gray-50 transition-colors focus-within:border-gray-300 focus-within:bg-white">
+                <div className="flex items-center py-2 pl-6 pr-16">
+                  {/* Course Name Input */}
+                  <input
+                    type="text"
+                    value={localFilters.search_text}
+                    onChange={(e) =>
+                      handleFilterChange('search_text', e.target.value)
+                    }
+                    placeholder="課程名稱"
+                    disabled={loading}
+                    className="flex-1 border-0 bg-transparent text-lg placeholder-gray-400 focus:outline-none focus:ring-0"
+                  />
+                  
+                  {/* Separator */}
+                  <div className="mx-4 h-8 w-px bg-gray-300"></div>
+                  
+                  {/* Department Selector */}
+                  <div className="w-48">
+                    <DepartmentSelector
+                      value={localFilters.departmentId}
+                      onChange={(value) => handleFilterChange('departmentId', value)}
+                      disabled={loading}
+                      className="border-0 text-lg focus:ring-0"
+                    />
+                  </div>
+                </div>
+                
+                {/* Search Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#C3F53C] text-gray-800 transition-colors hover:bg-[#B8ED2F]"
+                >
+                  {loading ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <Search className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+
+              {/* Clear Filter Button */}
+              <div className="mt-4 flex justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setLocalFilters({
+                      search_text: '',
+                      departmentId: 'all',
+                    });
+                    setSearchResults([]);
+                    router.push('/search');
+                  }}
+                  disabled={loading}
+                  className="text-sm"
+                >
+                  清除篩選
+                </Button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
 
       {error && (
         <div className="mb-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700">
