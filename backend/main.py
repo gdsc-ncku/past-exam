@@ -11,6 +11,7 @@ from routers.comment import router as comment_router
 from routers.course import router as course_router
 from routers.file import router as file_router
 from routers.user import router as user_router
+from routers.bookmark import router as bookmark_router
 
 settings = get_settings()
 
@@ -37,6 +38,7 @@ app.include_router(user_router)
 app.include_router(file_router)
 app.include_router(comment_router)
 app.include_router(course_router)
+app.include_router(bookmark_router)
 
 if __name__ == '__main__':
     uvicorn.run(

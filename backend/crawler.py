@@ -5,7 +5,7 @@ import pandas as pd
 import requests
 from sqlalchemy import create_engine, text
 
-url = 'https://api.wavjaby.nckuctf.org/api/v0/historySearch?dept=ALL'
+url = 'https://api.wavjaby.nckuctf.org/api/v0/historySearch?dept=ALL&semBegin=110-1&semEnd=113-2'
 df = pd.DataFrame()
 try:
     response = requests.get(url)
@@ -50,7 +50,7 @@ try:
     # Convert data types
     df['semester'] = df['semester'].astype(str)
     df['departmentId'] = df['departmentId'].astype(str)
-    df['serialNumber'] = df['serialNumber'].astype('Int64')
+    df['serialNumber'] = pd.to_numeric(df['serialNumber'], errors='coerce').astype('Int64')
     df['attributeCode'] = df['attributeCode'].astype(str)
     df['systemCode'] = df['systemCode'].astype(str)
     df['forGrade'] = pd.to_numeric(df['forGrade'], errors='coerce')

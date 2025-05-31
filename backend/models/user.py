@@ -2,13 +2,21 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
-from sqlalchemy import String
+from sqlalchemy import String, Table, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
 if TYPE_CHECKING:
     from .file import File
+
+# Association table for many-to-many relationship between users and bookmarked files
+user_bookmarks = Table(
+    'user_bookmarks',
+    Base.metadata,
+    Column('user_id', String(50), ForeignKey('users.user_id'), primary_key=True),
+    Column('file_id', String(255), ForeignKey('files.file_id'), primary_key=True)
+)
 
 
 class User(Base):
@@ -29,6 +37,14 @@ class User(Base):
         lazy='select',
         order_by='File.filename',
     )
+    
+    # Many-to-many relationship for bookmarked files
+    bookmarked_files: Mapped[list['File']] = relationship(
+        'File',  # type: ignore
+        secondary=user_bookmarks,
+        lazy='select',
+        order_by='File.timestamp.desc()',
+    )
 
     def __init__(
         self,
@@ -46,6 +62,7 @@ class User(Base):
         self.is_profile_completed = is_profile_completed
         self.timestamp = datetime.now()
         self.files = []
+        self.bookmarked_files = []
         self.department = department
 
     def __repr__(self):

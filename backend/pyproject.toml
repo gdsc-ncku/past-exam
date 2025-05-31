@@ -21,6 +21,8 @@ google-auth = "^2.37.0"
 pyjwt = "^2.10.1"
 minio = "^7.2.15"
 pandas = "^2.2.3"
+redis = "^6.2.0"
+
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

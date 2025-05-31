@@ -12,6 +12,16 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - backend-network
+  redis:
+    image: redis:7-alpine
+    container_name: MyRedis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    networks:
+      - backend-network
   crawler:
     image: python:3.11.10
     container_name: MyCrawler
@@ -82,6 +92,7 @@ services:
     depends_on:
       - postgres
       - minio
+      - redis
     env_file:
       - .env
     environment:

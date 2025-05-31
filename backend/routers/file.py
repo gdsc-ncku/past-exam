@@ -56,9 +56,9 @@ async def create_file(
 
 @router.get('/{file_id}', response_model=ResponseModel[FileResponseSchema])
 async def get_file(
-    file_id: str, token: str | None = Cookie(default=None), db: Session = Depends(get_db)
+    file_id: str, 
+    db: Session = Depends(get_db)
 ):
-    jwt_service.verify_token(token)
     return file_crud.get_file_by_id(db, file_id)
 
 

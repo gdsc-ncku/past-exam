@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
@@ -12,6 +12,7 @@ from schemas.common import ResponseModel, ResponseStatus
 from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
 from services.minio import MinioService
+from services.cache import CacheService
 
 
 class FileCRUD:
@@ -35,7 +36,7 @@ class FileCRUD:
             raise HTTPException(status_code=400, detail='File extension not allowed.')
 
     async def create_file(
-        self, db: Session, file_data: FileCreateSchema, upload_file: UploadFile
+        self, db: Session, file_data: FileCreateSchema, upload_file: UploadFile, cache: CacheService = None
     ) -> ResponseModel[FileResponseSchema]:
         try:
             self._validate_file(upload_file)
@@ -86,6 +87,14 @@ class FileCRUD:
                 db.commit()
                 db.refresh(db_file)
 
+                # Invalidate related caches
+                if cache:
+                    cache.invalidate_file_related_caches(
+                        str(db_file.id), 
+                        str(file_data.user_id), 
+                        str(file_data.course_id)
+                    )
+
                 return ResponseModel(
                     status=ResponseStatus.SUCCESS,
                     message='File uploaded successfully',
@@ -101,9 +110,38 @@ class FileCRUD:
         except Exception:
             raise HTTPException(status_code=500, detail='Failed to process file upload')
 
-    def read_all_file(self, db: Session, user_id: str) -> ResponseModel[List[FileResponseSchema]]:
+    def read_all_file(self, db: Session, user_id: str, cache: CacheService = None) -> ResponseModel[List[FileResponseSchema]]:
         try:
+            # Try to get from cache first
+            if cache:
+                cached_files = cache.get_user_files_cache(user_id)
+                if cached_files:
+                    return ResponseModel(
+                        status=ResponseStatus.SUCCESS,
+                        data=[FileResponseSchema.model_validate(File(**file_data)) for file_data in cached_files],
+                    )
+
             files = db.query(File).filter(File.user_id == user_id).all()
+            
+            # Cache the result
+            if cache:
+                files_data = []
+                for file in files:
+                    file_dict = {
+                        "id": str(file.id),
+                        "filename": file.filename,
+                        "file_location": file.file_location,
+                        "user_id": str(file.user_id),
+                        "file_id": file.file_id,
+                        "course_id": str(file.course_id) if file.course_id else None,
+                        "exam_type": file.exam_type,
+                        "info": file.info,
+                        "anonymous": file.anonymous,
+                        "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                    }
+                    files_data.append(file_dict)
+                cache.set_user_files_cache(user_id, files_data)
+            
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
                 data=[FileResponseSchema.model_validate(file) for file in files],
@@ -112,14 +150,43 @@ class FileCRUD:
         except Exception:
             raise HTTPException(status_code=500, detail='Failed to fetch files.')
 
-    def get_files_by_course(self, db: Session, course_id: str) -> ResponseModel[List[FileResponseSchema]]:
+    def get_files_by_course(self, db: Session, course_id: str, cache: CacheService = None) -> ResponseModel[List[FileResponseSchema]]:
         try:
             # Validate course exists
             course = db.query(Course).filter(Course.course_id == course_id).first()
             if not course:
                 raise HTTPException(status_code=404, detail=f'Course with id {course_id} not found')
 
+            # Try to get from cache first
+            if cache:
+                cached_files = cache.get_course_files_cache(course_id)
+                if cached_files:
+                    return ResponseModel(
+                        status=ResponseStatus.SUCCESS,
+                        data=[FileResponseSchema.model_validate(File(**file_data)) for file_data in cached_files],
+                    )
+
             files = db.query(File).filter(File.course_id == course_id).all()
+            
+            # Cache the result
+            if cache:
+                files_data = []
+                for file in files:
+                    file_dict = {
+                        "id": str(file.id),
+                        "filename": file.filename,
+                        "file_location": file.file_location,
+                        "user_id": str(file.user_id),
+                        "file_id": file.file_id,
+                        "course_id": str(file.course_id) if file.course_id else None,
+                        "exam_type": file.exam_type,
+                        "info": file.info,
+                        "anonymous": file.anonymous,
+                        "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                    }
+                    files_data.append(file_dict)
+                cache.set_course_files_cache(course_id, files_data)
+            
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
                 data=[FileResponseSchema.model_validate(file) for file in files],
@@ -131,48 +198,99 @@ class FileCRUD:
             print(e)
             raise HTTPException(status_code=500, detail='Failed to fetch files for course.')
 
-    def get_file_by_id(self, db: Session, file_id: str) -> ResponseModel[FileResponseSchema]:
-        file = db.query(File).filter(File.file_id == file_id).first()
-        if not file:
-            raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
+    def get_file_by_id(self, db: Session, file_id: str, cache: CacheService = None) -> ResponseModel[FileResponseSchema]:
+        try:
+            # Try to get from cache first
+            if cache:
+                cached_file = cache.get_file_cache(file_id)
+                if cached_file:
+                    # Still need to generate fresh presigned URL for cached files
+                    file_obj = File(**cached_file)
+                    presigned_url = self.minio_service.get_presigned_url(
+                        bucket_name=self.settings.minio_file_bucket,
+                        object_name=file_obj.file_location,
+                        expires=3600,
+                    )
+                    if presigned_url:
+                        file_data = FileResponseSchema.model_validate(file_obj)
+                        file_data.file_location = presigned_url
+                        return ResponseModel(
+                            status=ResponseStatus.SUCCESS,
+                            data=file_data,
+                        )
 
-        # Generate a temporary presigned URL that expires
-        presigned_url = self.minio_service.get_presigned_url(
-            bucket_name=self.settings.minio_file_bucket,
-            object_name=file.file_location,
-            expires=3600,  # URL expires in 1 hour
-        )
-        
-        if not presigned_url:
-            print(f"Failed to generate presigned URL for file {file_id}, bucket: {self.settings.minio_file_bucket}, object: {file.file_location}")
-            raise HTTPException(status_code=500, detail='Failed to generate file access URL')
+            file = db.query(File).filter(File.file_id == file_id).first()
+            if not file:
+                raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
 
-        # Create a copy of the file data with the temporary URL
-        file_data = FileResponseSchema.model_validate(file)
-        file_data.file_location = presigned_url
+            # Generate a temporary presigned URL that expires
+            presigned_url = self.minio_service.get_presigned_url(
+                bucket_name=self.settings.minio_file_bucket,
+                object_name=file.file_location,
+                expires=3600,  # URL expires in 1 hour
+            )
+            
+            if not presigned_url:
+                print(f"Failed to generate presigned URL for file {file_id}, bucket: {self.settings.minio_file_bucket}, object: {file.file_location}")
+                raise HTTPException(status_code=500, detail='Failed to generate file access URL')
 
-        return ResponseModel(status=ResponseStatus.SUCCESS, data=file_data)
+            # Create a copy of the file data with the temporary URL
+            file_data = FileResponseSchema.model_validate(file)
+            file_data.file_location = presigned_url
 
-    def delete_file(self, db: Session, file_id: str, user_id: str) -> ResponseModel[None]:
+            # Cache the result (without the presigned URL)
+            if cache:
+                file_dict = {
+                    "id": str(file.id),
+                    "filename": file.filename,
+                    "file_location": file.file_location,  # Store original path, not presigned URL
+                    "user_id": str(file.user_id),
+                    "file_id": file.file_id,
+                    "course_id": str(file.course_id) if file.course_id else None,
+                    "exam_type": file.exam_type,
+                    "info": file.info,
+                    "anonymous": file.anonymous,
+                    "upload_time": file.upload_time.isoformat() if file.upload_time else None
+                }
+                cache.set_file_cache(file_id, file_dict)
+
+            return ResponseModel(status=ResponseStatus.SUCCESS, data=file_data)
+
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail='Failed to fetch file')
+
+    def delete_file(self, db: Session, file_id: str, user_id: str, cache: CacheService = None) -> ResponseModel[None]:
         try:
             file = db.query(File).filter(File.file_id == file_id, File.user_id == user_id).first()
             if not file:
                 raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
 
-            self.minio_service.delete_file(
-                bucket_name=self.settings.minio_file_bucket, object_name=file.file_location
-            )
+            # Delete file from MinIO storage
+            try:
+                self.minio_service.delete_file(
+                    bucket_name=self.settings.minio_file_bucket, object_name=file.file_location
+                )
+            except Exception as e:
+                print(e)
+                raise HTTPException(status_code=500, detail='Failed to delete file from storage')
+
+            # Delete file record from database
             db.delete(file)
             db.commit()
+
+            # Invalidate related caches
+            if cache:
+                cache.invalidate_file_related_caches(file_id, str(user_id), str(file.course_id))
+
             return ResponseModel(
                 status=ResponseStatus.SUCCESS,
-                message=f'File with id {file_id} deleted successfully',
+                message='File deleted successfully',
+                data=None,
             )
 
         except HTTPException:
-            db.rollback()
             raise
         except Exception as e:
-            db.rollback()
             print(e)
             raise HTTPException(status_code=500, detail='Failed to delete file.')
