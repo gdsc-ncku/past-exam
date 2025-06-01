@@ -16,25 +16,75 @@ export const formatDate = (date: Date) => {
   });
 };
 
-export const getAvatarUrl = (avatarPath: string) => {
+export const getAvatarUrl = (avatarPath: string, bustCache = false) => {
   // Check if avatarPath is already a full URL
-  const isFullUrl = avatarPath.startsWith('http://') || avatarPath.startsWith('https://');
-  
+  const isFullUrl =
+    avatarPath.startsWith('http://') || avatarPath.startsWith('https://');
+
+  let baseUrl: string;
   if (isFullUrl) {
-    return avatarPath;
+    baseUrl = avatarPath;
   } else {
     // Construct avatar URL using file server endpoint + avatar path
     const fileServerURL =
       process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
-    return `${fileServerURL}${avatarPath}`;
+    baseUrl = `${fileServerURL}${avatarPath}`;
+  }
+
+  // Add cache busting parameter if requested
+  if (bustCache) {
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}t=${Date.now()}`;
+  }
+
+  return baseUrl;
+};
+
+// Cache management utilities
+export const invalidateAvatarCache = (avatarUrl: string) => {
+  if (typeof window !== 'undefined') {
+    // Clear browser cache for the specific avatar URL
+    const img = new Image();
+    img.src = getAvatarUrl(avatarUrl, true); // Force reload with cache busting
+
+    // Clear any existing cached versions
+    const cachesToClear = [
+      avatarUrl,
+      getAvatarUrl(avatarUrl),
+      getAvatarUrl(avatarUrl, true),
+    ];
+
+    // Preload the new image to warm the cache
+    cachesToClear.forEach((url) => {
+      const preloadImg = new Image();
+      preloadImg.src = url;
+    });
+  }
+};
+
+// Force reload avatar images on the page
+export const refreshAvatarImages = () => {
+  if (typeof window !== 'undefined') {
+    const avatarImages = document.querySelectorAll(
+      'img[alt="Avatar"], img[alt*="avatar"]',
+    );
+    avatarImages.forEach((img) => {
+      const htmlImg = img as HTMLImageElement;
+      const originalSrc = htmlImg.src;
+
+      // Add cache busting parameter
+      const separator = originalSrc.includes('?') ? '&' : '?';
+      htmlImg.src = `${originalSrc}${separator}refresh=${Date.now()}`;
+    });
   }
 };
 
 export const downloadFile = async (fileLocation: string, filename: string) => {
   try {
     // Check if fileLocation is already a full URL
-    const isFullUrl = fileLocation.startsWith('http://') || fileLocation.startsWith('https://');
-    
+    const isFullUrl =
+      fileLocation.startsWith('http://') || fileLocation.startsWith('https://');
+
     let downloadUrl: string;
     if (isFullUrl) {
       // Use the fileLocation as-is if it's already a full URL
@@ -76,8 +126,10 @@ export const downloadFile = async (fileLocation: string, filename: string) => {
     // Fallback to direct link method if fetch fails
     try {
       // Check if fileLocation is already a full URL for fallback too
-      const isFullUrl = fileLocation.startsWith('http://') || fileLocation.startsWith('https://');
-      
+      const isFullUrl =
+        fileLocation.startsWith('http://') ||
+        fileLocation.startsWith('https://');
+
       let downloadUrl: string;
       if (isFullUrl) {
         downloadUrl = fileLocation;

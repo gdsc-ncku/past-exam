@@ -55,9 +55,9 @@ export default function SettingPage() {
   };
 
   return (
-    <div className="container mx-auto mt-24 flex flex-col gap-16 px-16">
-      <div className="flex gap-8">
-        <div className="flex w-1/2 flex-col gap-8">
+    <div className="container mx-auto mt-16 flex flex-col gap-8 px-4 sm:mt-20 sm:gap-12 sm:px-8 lg:mt-24 lg:gap-16 lg:px-16">
+      <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row">
+        <div className="flex w-full flex-col gap-6 sm:gap-8 lg:w-1/2">
           <div className="flex flex-col gap-2">
             <Label>姓名</Label>
             <Input
@@ -97,8 +97,8 @@ export default function SettingPage() {
             />
           </div>
         </div>
-        <div className="w-1/2">
-          <div className="flex h-full flex-col items-center gap-4">
+        <div className="w-full lg:w-1/2">
+          <div className="flex h-full flex-col items-center gap-4 py-4 sm:py-6 lg:py-0">
             <AvatarUpload
               currentAvatar={currentUser?.avatar || ''}
               onAvatarUpdate={handleAvatarUpdate}
@@ -107,7 +107,7 @@ export default function SettingPage() {
         </div>
       </div>
       <Button
-        className="w-1/6 self-end"
+        className="w-full self-center sm:w-auto sm:min-w-32 sm:self-end lg:w-1/6"
         onClick={handleSave}
         disabled={!!errors.userName || !!errors.department}
       >

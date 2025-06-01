@@ -84,7 +84,9 @@ export default function UserBookmarkPage() {
               try {
                 // Fetch course info if course_id exists
                 if (file.course_id) {
-                  const courseResponse = await courseAPI.getCourse(file.course_id);
+                  const courseResponse = await courseAPI.getCourse(
+                    file.course_id,
+                  );
                   if (
                     courseResponse.data.status === 'success' &&
                     courseResponse.data.data
@@ -131,9 +133,11 @@ export default function UserBookmarkPage() {
   const handleRemoveBookmark = async (file: ExtendedFileResponse) => {
     try {
       await bookmarkAPI.removeBookmark(file.file_id);
-      
+
       // Remove from local state
-      setFiles(prevFiles => prevFiles.filter(f => f.file_id !== file.file_id));
+      setFiles((prevFiles) =>
+        prevFiles.filter((f) => f.file_id !== file.file_id),
+      );
     } catch (error) {
       console.error('Error removing bookmark:', error);
       // You could add a toast notification here
@@ -151,115 +155,141 @@ export default function UserBookmarkPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="mb-6 flex flex-col items-start justify-between space-y-4 sm:mb-8 sm:flex-row sm:items-center sm:space-y-0">
+        <div className="flex items-center space-x-3 sm:space-x-4">
           <Button
             variant="secondary"
             onClick={() => router.back()}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 text-sm sm:text-base"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>返回</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">我的收藏</h1>
-            <p className="mt-1 text-gray-600">查看您收藏的考古題檔案</p>
+            <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl">
+              我的收藏
+            </h1>
+            <p className="mt-1 text-sm text-gray-600 sm:text-base">
+              查看您收藏的考古題檔案
+            </p>
           </div>
         </div>
 
         <Button
           onClick={() => router.push('/search')}
-          className="flex items-center space-x-2"
+          className="flex w-full items-center justify-center space-x-2 text-sm sm:w-auto sm:text-base"
         >
-          <Heart className="h-4 w-4" />
+          <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
           <span>尋找更多考古題</span>
         </Button>
       </div>
 
       {/* Statistics Card */}
-      <Card className="mb-8 p-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      <Card className="mb-6 p-4 sm:mb-8 sm:p-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-pink-600">{files.length}</div>
-            <div className="text-sm text-gray-500">總收藏數</div>
+            <div className="text-xl font-bold text-pink-600 sm:text-2xl lg:text-3xl">
+              {files.length}
+            </div>
+            <div className="text-xs text-gray-500 sm:text-sm">總收藏數</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-xl font-bold text-blue-600 sm:text-2xl lg:text-3xl">
               {files.filter((f) => f.exam_type === 'midterm').length}
             </div>
-            <div className="text-sm text-gray-500">期中考</div>
+            <div className="text-xs text-gray-500 sm:text-sm">期中考</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-xl font-bold text-green-600 sm:text-2xl lg:text-3xl">
               {files.filter((f) => f.exam_type === 'final').length}
             </div>
-            <div className="text-sm text-gray-500">期末考</div>
+            <div className="text-xs text-gray-500 sm:text-sm">期末考</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600">
+            <div className="text-xl font-bold text-purple-600 sm:text-2xl lg:text-3xl">
               {new Set(files.map((f) => f.course_id)).size}
             </div>
-            <div className="text-sm text-gray-500">涵蓋課程</div>
+            <div className="text-xs text-gray-500 sm:text-sm">課程數</div>
           </div>
         </div>
       </Card>
 
       {/* Files List */}
-      <Card className="p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">收藏的檔案</h2>
-          <div className="text-sm text-gray-500">{files.length} 個檔案</div>
+      <Card className="p-4 sm:p-6 lg:p-8">
+        <div className="mb-4 flex flex-col items-start justify-between space-y-2 sm:mb-6 sm:flex-row sm:items-center sm:space-y-0">
+          <h2 className="text-lg font-bold text-gray-900 sm:text-xl lg:text-2xl">
+            收藏的檔案
+          </h2>
+          <div className="text-xs text-gray-500 sm:text-sm">
+            {files.length} 個檔案
+          </div>
         </div>
 
         {error ? (
-          <div className="py-12 text-center">
-            <FileText className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-            <h3 className="mb-2 text-lg font-medium text-gray-900">載入失敗</h3>
-            <p className="mb-6 text-gray-600">{error}</p>
-            <Button onClick={() => window.location.reload()}>重新載入</Button>
+          <div className="py-8 text-center sm:py-12">
+            <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400 sm:h-16 sm:w-16" />
+            <h3 className="mb-2 text-base font-medium text-gray-900 sm:text-lg">
+              載入失敗
+            </h3>
+            <p className="mb-4 px-4 text-sm text-gray-600 sm:mb-6 sm:text-base">
+              {error}
+            </p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="text-sm sm:text-base"
+            >
+              重新載入
+            </Button>
           </div>
         ) : files.length === 0 ? (
-          <div className="py-12 text-center">
-            <BookmarkCheck className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-            <h3 className="mb-2 text-lg font-medium text-gray-900">
+          <div className="py-8 text-center sm:py-12">
+            <Heart className="mx-auto mb-4 h-12 w-12 text-gray-400 sm:h-16 sm:w-16" />
+            <h3 className="mb-2 text-base font-medium text-gray-900 sm:text-lg">
               尚未收藏任何檔案
             </h3>
-            <p className="mb-6 text-gray-600">
-              開始瀏覽課程並收藏有用的考古題檔案！
+            <p className="mb-4 px-4 text-sm text-gray-600 sm:mb-6 sm:text-base">
+              開始探索並收藏您感興趣的考古題檔案！
             </p>
-            <Button onClick={() => router.push('/search')}>
-              <Heart className="mr-2 h-4 w-4" />
-              探索檔案
+            <Button
+              onClick={() => router.push('/search')}
+              className="text-sm sm:text-base"
+            >
+              <Heart className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              尋找考古題
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {files.map((file) => (
               <div
                 key={file.file_id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 p-6 transition-colors hover:bg-gray-50 cursor-pointer"
+                className="flex cursor-pointer flex-col justify-between space-y-3 rounded-lg border border-gray-200 p-3 transition-colors hover:bg-gray-50 sm:flex-row sm:items-center sm:space-y-0 sm:p-4 lg:p-6"
                 onClick={() => router.push(`/file/${file.file_id}`)}
               >
-                <div className="flex flex-1 items-center space-x-4">
-                  {getFileIcon(file.filename)}
+                <div className="flex min-w-0 flex-1 items-start space-x-3 sm:items-center sm:space-x-4">
+                  <div className="mt-1 flex-shrink-0 sm:mt-0">
+                    {getFileIcon(file.filename)}
+                  </div>
 
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-gray-900">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-medium text-gray-900 sm:text-base">
                           {file.filename}
                         </h3>
-                        <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                        <div className="mt-1 flex flex-col space-y-1 text-xs text-gray-500 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0 sm:text-sm">
                           <span className="flex items-center space-x-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{formatDate(file.timestamp)}</span>
+                            <Clock className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">
+                              {formatDate(file.timestamp)}
+                            </span>
                           </span>
                           {file.exam_type && (
                             <span className="flex items-center space-x-1">
-                              <FileText className="h-3 w-3" />
-                              <span>
+                              <FileText className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">
                                 {examTypeMap[file.exam_type] || file.exam_type}
                               </span>
                             </span>
@@ -268,9 +298,11 @@ export default function UserBookmarkPage() {
 
                         {/* Course Info */}
                         {file.courseName && (
-                          <div className="mt-2 text-sm text-gray-600">
-                            <span className="font-medium">{file.courseCode}</span>{' '}
-                            {file.courseName}
+                          <div className="mt-2 text-xs text-gray-600 sm:text-sm">
+                            <span className="font-medium">
+                              {file.courseCode}
+                            </span>{' '}
+                            <span className="truncate">{file.courseName}</span>
                           </div>
                         )}
                       </div>
@@ -279,7 +311,7 @@ export default function UserBookmarkPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="ml-4 flex items-center space-x-2">
+                <div className="flex flex-shrink-0 items-center justify-end space-x-2">
                   {file.course_id && (
                     <Button
                       variant="secondary"
@@ -287,10 +319,11 @@ export default function UserBookmarkPage() {
                         e.stopPropagation();
                         handleViewCourse(file.course_id);
                       }}
-                      className="flex items-center space-x-1"
+                      className="flex items-center space-x-1 px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm"
                     >
                       <Eye className="h-3 w-3" />
-                      <span>查看課程</span>
+                      <span className="hidden sm:inline">查看課程</span>
+                      <span className="sm:hidden">課程</span>
                     </Button>
                   )}
 
@@ -300,10 +333,11 @@ export default function UserBookmarkPage() {
                       e.stopPropagation();
                       handleDownload(file);
                     }}
-                    className="flex items-center space-x-1"
+                    className="flex items-center space-x-1 px-2 py-1 text-xs sm:px-3 sm:py-2 sm:text-sm"
                   >
                     <Download className="h-3 w-3" />
-                    <span>下載</span>
+                    <span className="hidden sm:inline">下載</span>
+                    <span className="sm:hidden">下載</span>
                   </Button>
 
                   <button
@@ -311,9 +345,9 @@ export default function UserBookmarkPage() {
                       e.stopPropagation();
                       handleRemoveBookmark(file);
                     }}
-                    className="p-2 text-gray-400 transition-colors hover:text-red-500"
+                    className="p-1 text-pink-500 transition-colors hover:text-pink-700 sm:p-2"
                   >
-                    <BookmarkX className="h-5 w-5" />
+                    <BookmarkX className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                 </div>
               </div>
@@ -323,4 +357,4 @@ export default function UserBookmarkPage() {
       </Card>
     </div>
   );
-} 
+}

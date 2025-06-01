@@ -32,7 +32,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black bg-opacity-50"
@@ -40,7 +40,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
       />
 
       {/* Modal Content */}
-      <div className="relative z-10 mx-4 w-full max-w-md">{children}</div>
+      <div className="relative z-10 w-full max-w-md">{children}</div>
     </div>
   );
 };
@@ -85,7 +85,6 @@ const uploadSchema = z.object({
   instructor: z.string().min(1, '授課教師為必填'),
   examType: z.string().min(1, '考試類型為必填'),
   examScope: z.string().optional(),
-  isAnonymous: z.boolean(),
 });
 
 const examTypes = [
@@ -93,7 +92,7 @@ const examTypes = [
   { value: 'final', label: '期末考' },
   { value: 'quiz', label: '小考' },
   { value: 'homework', label: '作業' },
-  { value: 'other', label: '其他' },
+  { value: 'others', label: '其他' },
 ];
 
 const currentYear = new Date().getFullYear();
@@ -148,7 +147,6 @@ function UploadForm() {
     instructor: '',
     examType: '',
     examScope: '',
-    isAnonymous: false,
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -330,31 +328,20 @@ function UploadForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check authentication before allowing submission
-    if (!currentUser) {
+    if (!authChecked || !currentUser) {
       setShowLoginModal(true);
-      toast.error('請先登入後再上傳檔案');
       return;
     }
 
     if (!validateForm()) {
-      toast.error('請檢查表單內容');
+      toast('請檢查並修正表單錯誤');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Validate form data one more time
-      uploadSchema.parse(formData);
-      const fileError = validateFile(selectedFile);
-      if (fileError) {
-        toast.error(fileError);
-        return;
-      }
-
-      // Call the real upload API
-      const response = await uploadAPI.uploadFile({
+      const uploadData = {
         year: formData.year,
         courseId: formData.courseId,
         courseName: formData.courseName,
@@ -362,12 +349,13 @@ function UploadForm() {
         instructor: formData.instructor,
         examType: formData.examType,
         examScope: formData.examScope,
-        isAnonymous: formData.isAnonymous,
         file: selectedFile!,
-      });
+      };
+
+      const response = await uploadAPI.uploadFile(uploadData);
 
       if (response.data.status === 'success') {
-        toast.success('檔案上傳成功！');
+        toast('檔案上傳成功！');
 
         // Reset form
         setFormData({
@@ -378,37 +366,18 @@ function UploadForm() {
           instructor: '',
           examType: '',
           examScope: '',
-          isAnonymous: false,
         });
         setSelectedFile(null);
+        setErrors({});
 
-        // Optionally redirect to another page
-        // router.push('/');
+        // Redirect to course page or files list
+        router.push(`/course/${formData.courseId}`);
       } else {
-        toast.error(response.data.message || '上傳失敗，請稍後再試');
+        toast('上傳失敗，請稍後再試');
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Upload error:', error);
-
-      // Handle different types of errors
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else if (
-        typeof error === 'object' &&
-        error !== null &&
-        'response' in error
-      ) {
-        const axiosError = error as {
-          response?: { data?: { message?: string } };
-        };
-        if (axiosError.response?.data?.message) {
-          toast.error(axiosError.response.data.message);
-        } else {
-          toast.error('上傳失敗，請稍後再試');
-        }
-      } else {
-        toast.error('上傳失敗，請稍後再試');
-      }
+      toast('上傳時發生錯誤，請稍後再試');
     } finally {
       setLoading(false);
     }
@@ -423,7 +392,7 @@ function UploadForm() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       {/* Login Modal */}
       <LoginModal
         isOpen={showLoginModal}
@@ -436,31 +405,37 @@ function UploadForm() {
         <div className="mb-4">
           {currentUser ? (
             <div className="flex items-center text-sm text-green-600">
-              <UserCheck className="mr-2 h-4 w-4" />
-              已登入，可以上傳檔案
+              <UserCheck className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">已登入，可以上傳檔案</span>
             </div>
           ) : (
             <div className="flex items-center text-sm text-amber-600">
-              <LogIn className="mr-2 h-4 w-4" />
-              未登入，請先登入後再上傳檔案
+              <LogIn className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">未登入，請先登入後再上傳檔案</span>
             </div>
           )}
         </div>
       )}
 
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold">上傳試題檔案</h1>
-        <p className="text-gray-600">請填寫以下資訊並上傳您的試題檔案</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="mb-2 text-2xl font-bold sm:text-3xl">上傳試題檔案</h1>
+        <p className="text-sm text-gray-600 sm:text-base">
+          請填寫以下資訊並上傳您的試題檔案
+        </p>
       </div>
 
-      <Card className={`relative p-8 ${!currentUser ? 'opacity-75' : ''}`}>
-        <form onSubmit={handleSubmit} className="space-y-8">
+      <Card
+        className={`relative p-4 sm:p-6 lg:p-8 ${!currentUser ? 'opacity-75' : ''}`}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Overlay for non-authenticated users */}
           {authChecked && !currentUser && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white bg-opacity-50">
-              <div className="p-6 text-center">
-                <LogIn className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-                <p className="text-lg text-gray-600">請先登入以使用上傳功能</p>
+              <div className="p-4 text-center sm:p-6">
+                <LogIn className="mx-auto mb-4 h-12 w-12 text-gray-400 sm:h-16 sm:w-16" />
+                <p className="text-base text-gray-600 sm:text-lg">
+                  請先登入以使用上傳功能
+                </p>
                 <Button onClick={handleLoginClick} className="mt-4">
                   <LogIn className="mr-2 h-4 w-4" />
                   登入
@@ -470,15 +445,15 @@ function UploadForm() {
           )}
 
           {/* Two Column Layout */}
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
             {/* Left Column - Form Fields */}
             <div className="space-y-6">
-              <h2 className="border-b border-gray-200 pb-2 text-xl font-semibold text-gray-900">
+              <h2 className="border-b border-gray-200 pb-2 text-lg font-semibold text-gray-900 sm:text-xl">
                 課程資訊
               </h2>
 
               {/* Year and Course Info */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="year">年份 *</Label>
                   <Select
@@ -537,17 +512,17 @@ function UploadForm() {
               {/* Show selected course details */}
               {formData.courseName && (
                 <div className="rounded-md bg-gray-50 p-3 text-sm">
-                  <div className="font-medium text-gray-900">
+                  <div className="break-words font-medium text-gray-900">
                     {formData.courseName}
                   </div>
-                  <div className="text-gray-600">
+                  <div className="break-words text-gray-600">
                     課程代碼：{formData.courseCode} | 授課教師：
                     {formData.instructor}
                   </div>
                 </div>
               )}
 
-              <h3 className="mt-6 border-b border-gray-200 pb-2 text-lg font-medium text-gray-900">
+              <h3 className="mt-6 border-b border-gray-200 pb-2 text-base font-medium text-gray-900 sm:text-lg">
                 考試資訊
               </h3>
 
@@ -605,54 +580,11 @@ function UploadForm() {
                   </span>
                 )}
               </div>
-
-              {/* Anonymous Option */}
-              <div className="space-y-3">
-                <Label>是否匿名 *</Label>
-                <div className="flex space-x-6">
-                  <div className="flex items-center">
-                    <input
-                      id="anonymous-no"
-                      name="isAnonymous"
-                      type="radio"
-                      value="false"
-                      checked={!formData.isAnonymous}
-                      onChange={(e) => handleInputChange('isAnonymous', false)}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      disabled={loading}
-                    />
-                    <label
-                      htmlFor="anonymous-no"
-                      className="ml-3 block cursor-pointer text-sm font-medium text-gray-700"
-                    >
-                      顯示上傳者
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      id="anonymous-yes"
-                      name="isAnonymous"
-                      type="radio"
-                      value="true"
-                      checked={formData.isAnonymous}
-                      onChange={(e) => handleInputChange('isAnonymous', true)}
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                      disabled={loading}
-                    />
-                    <label
-                      htmlFor="anonymous-yes"
-                      className="ml-3 block cursor-pointer text-sm font-medium text-gray-700"
-                    >
-                      匿名上傳
-                    </label>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right Column - File Upload */}
             <div className="space-y-6">
-              <h2 className="border-b border-gray-200 pb-2 text-xl font-semibold text-gray-900">
+              <h2 className="border-b border-gray-200 pb-2 text-lg font-semibold text-gray-900 sm:text-xl">
                 檔案上傳
               </h2>
 
@@ -660,7 +592,7 @@ function UploadForm() {
               <div className="space-y-2">
                 <Label htmlFor="file">上傳檔案 *</Label>
                 <div
-                  className={`mt-1 flex min-h-[300px] justify-center rounded-lg border-2 border-dashed px-6 pb-8 pt-8 transition-colors ${
+                  className={`mt-1 flex min-h-[250px] justify-center rounded-lg border-2 border-dashed px-4 pb-6 pt-6 transition-colors sm:min-h-[300px] sm:px-6 sm:pb-8 sm:pt-8 ${
                     isDragOver
                       ? 'border-primary-400 bg-primary-50/50'
                       : 'border-gray-300 hover:border-gray-400'
@@ -673,9 +605,9 @@ function UploadForm() {
                   <div className="space-y-2 text-center">
                     {selectedFile ? (
                       <div className="flex flex-col items-center space-y-4">
-                        <FileText className="h-16 w-16 text-blue-500" />
+                        <FileText className="h-12 w-12 text-blue-500 sm:h-16 sm:w-16" />
                         <div className="text-center">
-                          <p className="text-lg font-medium text-gray-900">
+                          <p className="break-words px-2 text-base font-medium text-gray-900 sm:text-lg">
                             {selectedFile.name}
                           </p>
                           <p className="mt-1 text-sm text-gray-500">
@@ -695,14 +627,16 @@ function UploadForm() {
                     ) : (
                       <div className="flex flex-col items-center space-y-4">
                         <Upload
-                          className={`h-16 w-16 transition-colors ${isDragOver ? 'text-primary-600' : 'text-gray-400'}`}
+                          className={`h-12 w-12 transition-colors sm:h-16 sm:w-16 ${isDragOver ? 'text-primary-600' : 'text-gray-400'}`}
                         />
                         <div className="text-center">
                           <label
                             htmlFor="file-upload"
                             className="relative cursor-pointer rounded-md bg-white font-medium text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 hover:text-blue-500 hover:text-primary-400"
                           >
-                            <span className="text-lg">選擇檔案</span>
+                            <span className="text-base sm:text-lg">
+                              選擇檔案
+                            </span>
                             <input
                               id="file-upload"
                               name="file-upload"
@@ -714,12 +648,12 @@ function UploadForm() {
                             />
                           </label>
                           <p
-                            className={`mt-2 transition-colors ${isDragOver ? 'font-medium text-primary-600' : 'text-gray-500'}`}
+                            className={`mt-2 text-sm transition-colors sm:text-base ${isDragOver ? 'font-medium text-primary-600' : 'text-gray-500'}`}
                           >
                             {isDragOver ? '放開以上傳檔案' : '或拖拽檔案到此處'}
                           </p>
                         </div>
-                        <div className="text-center">
+                        <div className="px-2 text-center">
                           <p className="text-sm text-gray-500">
                             支援檔案類型：
                           </p>
@@ -740,7 +674,7 @@ function UploadForm() {
               </div>
 
               {/* Upload Tips */}
-              <div className="rounded-lg border border-gray-200  p-4">
+              <div className="rounded-lg border border-gray-200 p-3 sm:p-4">
                 <h3 className="mb-2 text-sm font-medium text-gray-800">
                   上傳提示
                 </h3>
@@ -756,16 +690,21 @@ function UploadForm() {
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex justify-end space-x-4 border-t border-gray-200 pt-6">
+          <div className="flex flex-col justify-end space-y-3 border-t border-gray-200 pt-6 sm:flex-row sm:space-x-4 sm:space-y-0">
             <Button
               type="button"
               variant="secondary"
               onClick={() => router.back()}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               取消
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
               {loading ? '上傳中...' : '上傳檔案'}
             </Button>
           </div>

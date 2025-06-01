@@ -203,7 +203,7 @@ function SearchContent() {
     const handleInputSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       const page = parseInt(inputPage);
-      if (page && page >= 1 && page <= totalPages) {
+      if (page >= 1 && page <= totalPages) {
         handlePageClick(page);
       } else {
         setInputPage(currentPage.toString());
@@ -211,69 +211,88 @@ function SearchContent() {
     };
 
     const handleInputBlur = () => {
-      setInputPage(currentPage.toString());
+      const page = parseInt(inputPage);
+      if (isNaN(page) || page < 1 || page > totalPages) {
+        setInputPage(currentPage.toString());
+      }
     };
 
+    if (totalPages <= 1) return null;
+
     return (
-      <div className="mt-4 flex flex-col items-center space-y-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-center space-x-1 py-4 sm:space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2">
           <div title="第一頁">
-            <ChevronFirst 
-              className={`h-6 w-6 cursor-pointer transition-colors ${
+            <ChevronFirst
+              className={`h-5 w-5 cursor-pointer transition-colors sm:h-6 sm:w-6 ${
                 currentOffset === 0 || disabled
-                  ? 'text-gray-300 cursor-not-allowed'
+                  ? 'cursor-not-allowed text-gray-300'
                   : 'text-gray-600 hover:text-black'
               }`}
-              onClick={() => !disabled && currentOffset !== 0 && handlePageClick(1)}
+              onClick={() =>
+                !disabled && currentOffset !== 0 && handlePageClick(1)
+              }
             />
           </div>
           <div title="上一頁">
-            <ChevronLeft 
-              className={`h-6 w-6 cursor-pointer transition-colors ${
+            <ChevronLeft
+              className={`h-5 w-5 cursor-pointer transition-colors sm:h-6 sm:w-6 ${
                 currentOffset === 0 || disabled
-                  ? 'text-gray-300 cursor-not-allowed'
+                  ? 'cursor-not-allowed text-gray-300'
                   : 'text-gray-600 hover:text-black'
               }`}
-              onClick={() => !disabled && currentOffset !== 0 && handlePageClick(currentPage - 1)}
+              onClick={() =>
+                !disabled &&
+                currentOffset !== 0 &&
+                handlePageClick(currentPage - 1)
+              }
             />
           </div>
 
           <form
             onSubmit={handleInputSubmit}
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-1 sm:space-x-2"
           >
-            <span className="text-sm text-gray-600">第</span>
+            <span className="text-xs text-gray-600 sm:text-sm">第</span>
             <input
               type="text"
               value={inputPage}
               onChange={handleInputChange}
               onBlur={handleInputBlur}
-              className="h-8 w-12 rounded-md border border-gray-300 text-center text-sm text-gray-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-7 w-10 rounded-md border border-gray-300 text-center text-xs text-gray-600 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 sm:h-8 sm:w-12 sm:text-sm"
               disabled={disabled}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-xs text-gray-600 sm:text-sm">
               頁，共 {totalPages} 頁
             </span>
           </form>
 
           <div title="下一頁">
-            <ChevronRightIcon 
-              className={`h-6 w-6 cursor-pointer transition-colors ${
+            <ChevronRightIcon
+              className={`h-5 w-5 cursor-pointer transition-colors sm:h-6 sm:w-6 ${
                 currentOffset + ITEMS_PER_PAGE >= totalItems || disabled
-                  ? 'text-gray-300 cursor-not-allowed'
+                  ? 'cursor-not-allowed text-gray-300'
                   : 'text-gray-600 hover:text-black'
               }`}
-              onClick={() => !disabled && currentOffset + ITEMS_PER_PAGE < totalItems && handlePageClick(currentPage + 1)}
+              onClick={() =>
+                !disabled &&
+                currentOffset + ITEMS_PER_PAGE < totalItems &&
+                handlePageClick(currentPage + 1)
+              }
             />
           </div>
           <div title="最後一頁">
-            <ChevronLast 
-              className={`h-6 w-6 cursor-pointer transition-colors ${
+            <ChevronLast
+              className={`h-5 w-5 cursor-pointer transition-colors sm:h-6 sm:w-6 ${
                 currentOffset + ITEMS_PER_PAGE >= totalItems || disabled
-                  ? 'text-gray-300 cursor-not-allowed'
+                  ? 'cursor-not-allowed text-gray-300'
                   : 'text-gray-600 hover:text-black'
               }`}
-              onClick={() => !disabled && currentOffset + ITEMS_PER_PAGE < totalItems && handlePageClick(totalPages)}
+              onClick={() =>
+                !disabled &&
+                currentOffset + ITEMS_PER_PAGE < totalItems &&
+                handlePageClick(totalPages)
+              }
             />
           </div>
         </div>
@@ -282,20 +301,24 @@ function SearchContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       {/* Title and Subtitle */}
-      <div className="mb-8">
-        <h1 className="mb-4 text-4xl font-bold text-gray-900">成大知識共享平台</h1>
-        <p className="text-lg text-gray-600">檢索知識，從這裡開始！</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 sm:mb-4 sm:text-3xl lg:text-4xl">
+          成大知識共享平台
+        </h1>
+        <p className="text-base text-gray-600 sm:text-lg">
+          檢索知識，從這裡開始！
+        </p>
       </div>
 
       {/* Search Interface */}
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         {/* Search Tabs */}
-        <div className="mb-6 flex space-x-8">
+        <div className="mb-4 flex space-x-4 sm:mb-6 sm:space-x-8">
           <button
             onClick={() => setActiveTab('quick')}
-            className={`pb-2 text-lg font-medium transition-colors ${
+            className={`pb-2 text-base font-medium transition-colors sm:text-lg ${
               activeTab === 'quick'
                 ? 'border-b-2 border-gray-900 text-gray-900'
                 : 'text-gray-500 hover:text-gray-700'
@@ -305,7 +328,7 @@ function SearchContent() {
           </button>
           <button
             onClick={() => setActiveTab('department')}
-            className={`pb-2 text-lg font-medium transition-colors ${
+            className={`pb-2 text-base font-medium transition-colors sm:text-lg ${
               activeTab === 'department'
                 ? 'border-b-2 border-gray-900 text-gray-900'
                 : 'text-gray-500 hover:text-gray-700'
@@ -316,7 +339,7 @@ function SearchContent() {
         </div>
 
         {/* Search Content */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {activeTab === 'quick' ? (
             /* Quick Search */
             <form
@@ -328,7 +351,9 @@ function SearchContent() {
                 }
                 params.set('limit', ITEMS_PER_PAGE.toString());
                 params.set('offset', '0');
-                router.replace(`/search?${params.toString()}`, { scroll: false });
+                router.replace(`/search?${params.toString()}`, {
+                  scroll: false,
+                });
                 handleSearch(e, 0);
               }}
               className="relative"
@@ -337,17 +362,19 @@ function SearchContent() {
                 <input
                   type="text"
                   value={localFilters.search_text}
-                  onChange={(e) => handleFilterChange('search_text', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('search_text', e.target.value)
+                  }
                   placeholder="輸入課程關鍵字/教授名/課程代碼......"
-                  className="w-full rounded-full border-2 border-gray-200 bg-gray-50 py-4 pl-6 pr-16 text-lg placeholder-gray-400 transition-colors focus:border-gray-300 focus:bg-white focus:outline-none"
+                  className="w-full rounded-full border-2 border-gray-200 bg-gray-50 py-3 pl-4 pr-12 text-base placeholder-gray-400 transition-colors focus:border-gray-300 focus:bg-white focus:outline-none sm:py-4 sm:pl-6 sm:pr-16 sm:text-lg"
                   disabled={loading}
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#C3F53C] text-gray-800 transition-colors hover:bg-[#B8ED2F]"
+                  className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-[#C3F53C] text-gray-800 transition-colors hover:bg-[#B8ED2F] sm:right-2 sm:h-12 sm:w-12"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
             </form>
@@ -364,55 +391,93 @@ function SearchContent() {
                 });
                 params.set('limit', ITEMS_PER_PAGE.toString());
                 params.set('offset', '0');
-                router.replace(`/search?${params.toString()}`, { scroll: false });
+                router.replace(`/search?${params.toString()}`, {
+                  scroll: false,
+                });
                 handleSearch(e, 0);
               }}
-              className="relative"
+              className="space-y-4"
             >
-              <div className="relative rounded-full border-2 border-gray-200 bg-gray-50 transition-colors focus-within:border-gray-300 focus-within:bg-white">
-                <div className="flex items-center py-2 pl-6 pr-16">
-                  {/* Course Name Input */}
-                  <input
-                    type="text"
-                    value={localFilters.search_text}
-                    onChange={(e) =>
-                      handleFilterChange('search_text', e.target.value)
-                    }
-                    placeholder="課程名稱"
-                    disabled={loading}
-                    className="flex-1 border-0 bg-transparent text-lg placeholder-gray-400 focus:outline-none focus:ring-0"
-                  />
-                  
-                  {/* Separator */}
-                  <div className="mx-4 h-8 w-px bg-gray-300"></div>
-                  
-                  {/* Department Selector */}
-                  <div className="w-48">
-                    <DepartmentSelector
-                      value={localFilters.departmentId}
-                      onChange={(value) => handleFilterChange('departmentId', value)}
-                      disabled={loading}
-                      className="border-0 text-lg focus:ring-0"
-                    />
-                  </div>
-                </div>
-                
-                {/* Search Button */}
+              {/* Mobile: Stacked Layout */}
+              <div className="block space-y-4 sm:hidden">
+                <input
+                  type="text"
+                  value={localFilters.search_text}
+                  onChange={(e) =>
+                    handleFilterChange('search_text', e.target.value)
+                  }
+                  placeholder="課程名稱"
+                  disabled={loading}
+                  className="w-full rounded-full border-2 border-gray-200 bg-gray-50 px-4 py-3 text-base placeholder-gray-400 transition-colors focus:border-gray-300 focus:bg-white focus:outline-none"
+                />
+
+                <DepartmentSelector
+                  value={localFilters.departmentId}
+                  onChange={(value) =>
+                    handleFilterChange('departmentId', value)
+                  }
+                  disabled={loading}
+                  className="w-full rounded-full border-2 border-gray-200 bg-gray-50 px-4 py-3 text-base"
+                />
+
                 <button
                   type="submit"
                   disabled={loading}
-                  className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#C3F53C] text-gray-800 transition-colors hover:bg-[#B8ED2F]"
+                  className="w-full rounded-full bg-[#C3F53C] px-6 py-3 text-base font-medium text-gray-800 transition-colors hover:bg-[#B8ED2F] disabled:opacity-50"
                 >
-                  {loading ? (
-                    <LoadingSpinner size="sm" />
-                  ) : (
-                    <Search className="h-5 w-5" />
-                  )}
+                  {loading ? '搜尋中...' : '搜尋'}
                 </button>
               </div>
 
+              {/* Desktop: Inline Layout */}
+              <div className="hidden sm:block">
+                <div className="relative rounded-full border-2 border-gray-200 bg-gray-50 transition-colors focus-within:border-gray-300 focus-within:bg-white">
+                  <div className="flex items-center py-2 pl-6 pr-16">
+                    {/* Course Name Input */}
+                    <input
+                      type="text"
+                      value={localFilters.search_text}
+                      onChange={(e) =>
+                        handleFilterChange('search_text', e.target.value)
+                      }
+                      placeholder="課程名稱"
+                      disabled={loading}
+                      className="flex-1 border-0 bg-transparent text-lg placeholder-gray-400 focus:outline-none focus:ring-0"
+                    />
+
+                    {/* Separator */}
+                    <div className="mx-4 h-8 w-px bg-gray-300"></div>
+
+                    {/* Department Selector */}
+                    <div className="w-48">
+                      <DepartmentSelector
+                        value={localFilters.departmentId}
+                        onChange={(value) =>
+                          handleFilterChange('departmentId', value)
+                        }
+                        disabled={loading}
+                        className="border-0 text-lg focus:ring-0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Search Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-[#C3F53C] text-gray-800 transition-colors hover:bg-[#B8ED2F]"
+                  >
+                    {loading ? (
+                      <LoadingSpinner size="sm" />
+                    ) : (
+                      <Search className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
               {/* Clear Filter Button */}
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="secondary"
@@ -442,8 +507,8 @@ function SearchContent() {
       )}
 
       {loading ? (
-        <div className="mt-8">
-          <LoadingSpinner size="lg" className="mb-8" />
+        <div className="mt-6 sm:mt-8">
+          <LoadingSpinner size="lg" className="mb-6 sm:mb-8" />
           <div className="divide-y divide-gray-200">
             {[...Array(6)].map((_, index) => (
               <CourseRowSkeleton key={index} />
@@ -453,7 +518,7 @@ function SearchContent() {
       ) : (
         <>
           {searchResults.length > 0 ? (
-            <div className="mt-8 space-y-4">
+            <div className="mt-6 space-y-4 sm:mt-8">
               {searchResults.map((course) => (
                 <CourseCard key={course.course_id} course={course} />
               ))}
@@ -465,7 +530,7 @@ function SearchContent() {
               />
             </div>
           ) : hasSearched ? (
-            <div className="mt-8 text-center text-gray-500">
+            <div className="mt-6 text-center text-gray-500 sm:mt-8">
               找不到符合的課程。請調整搜尋條件。
             </div>
           ) : null}

@@ -27,7 +27,6 @@ export interface UploadFileData {
   instructor: string;
   examType: string;
   examScope?: string;
-  isAnonymous: boolean;
   file: File;
 }
 
@@ -46,7 +45,7 @@ export const uploadAPI = {
     if (uploadData.examScope) {
       formData.append('exam_scope', uploadData.examScope);
     }
-    formData.append('anonymous', uploadData.isAnonymous.toString());
+    formData.append('anonymous', 'false'); // Always false since anonymous functionality is removed
 
     // Add the file with correct field names expected by API
     formData.append('upload_file', uploadData.file);
@@ -66,6 +65,15 @@ export const uploadAPI = {
       message: string | null;
       timestamp: string;
     }>('/v1/file');
+  },
+
+  getRecentFiles: (limit: number = 20) => {
+    return axiosInstance.get<{
+      status: string;
+      data: FileResponse[];
+      message: string | null;
+      timestamp: string;
+    }>(`/v1/file/recent?limit=${limit}`);
   },
 
   getFilesByCourse: (courseId: string) => {

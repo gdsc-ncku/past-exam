@@ -8,10 +8,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="[color-scheme:light]">
-      <body className="h-screen overflow-y-scroll pb-36">
+      <body className="min-h-screen overflow-y-scroll bg-gray-50">
         <GlobalNav />
-        <div className="mx-auto max-w-7xl space-y-8 px-2 pt-20">
-          <div className="p-3.5 lg:p-6">{children}</div>
+        <div className="pt-16 lg:pt-24">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+          </div>
           <Toaster icons={{}} />
         </div>
       </body>
