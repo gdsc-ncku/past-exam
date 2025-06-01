@@ -12,10 +12,11 @@ settings = get_settings()
 
 class MinioService:
     def __init__(self):
+        # For anonymous access (no signature validation)
         self.minio_client = Minio(
             endpoint=settings.minio_endpoint,
-            access_key=settings.minio_access_key,
-            secret_key=settings.minio_secret_key,
+            access_key="",  # Empty for anonymous access
+            secret_key="",  # Empty for anonymous access
             secure=False,
         )
 
@@ -36,10 +37,9 @@ class MinioService:
 
     def get_presigned_url(self, bucket_name: str, object_name: str, expires: int = 3600):
         try:
-            url = self.minio_client.presigned_get_object(
-                bucket_name=bucket_name, object_name=object_name, expires=timedelta(seconds=expires)
-            )
-            return url.replace(settings.minio_endpoint, settings.minio_public_endpoint)
+            # For anonymous access, return direct URL instead of presigned URL
+            url = f"http://{settings.minio_public_endpoint}/{bucket_name}/{object_name}"
+            return url
         except S3Error as e:
             print(f'Error getting presigned URL for bucket={bucket_name}, object={object_name}: {e}')
             return None

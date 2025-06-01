@@ -204,18 +204,12 @@ class FileCRUD:
                 if cached_file:
                     # Still need to generate fresh presigned URL for cached files
                     file_obj = File(**cached_file)
-                    presigned_url = self.minio_service.get_presigned_url(
-                        bucket_name=self.settings.minio_file_bucket,
-                        object_name=file_obj.file_location,
-                        expires=3600,
+                    file_data = FileResponseSchema.model_validate(file_obj)
+                    file_data.file_location
+                    return ResponseModel(
+                        status=ResponseStatus.SUCCESS,
+                        data=file_data,
                     )
-                    if presigned_url:
-                        file_data = FileResponseSchema.model_validate(file_obj)
-                        file_data.file_location = presigned_url
-                        return ResponseModel(
-                            status=ResponseStatus.SUCCESS,
-                            data=file_data,
-                        )
 
             file = db.query(File).filter(File.file_id == file_id).first()
             if not file:
@@ -234,7 +228,6 @@ class FileCRUD:
 
             # Create a copy of the file data with the temporary URL
             file_data = FileResponseSchema.model_validate(file)
-            file_data.file_location = presigned_url
 
             # Cache the result (without the presigned URL)
             if cache:
@@ -291,3 +284,100 @@ class FileCRUD:
         except Exception as e:
             print(e)
             raise HTTPException(status_code=500, detail='Failed to delete file.')
+
+    def get_recent_uploads(self, db: Session, limit: int = 20, cache: CacheService = None) -> ResponseModel[List[FileResponseSchema]]:
+        """Get the most recent file uploads sorted by timestamp."""
+        try:
+            # Try to get from cache first
+            cache_key = f"recent_uploads_{limit}"
+            if cache:
+                cached_files = cache.get(cache_key)
+                if cached_files:
+                    return ResponseModel(
+                        status=ResponseStatus.SUCCESS,
+                        data=[FileResponseSchema.model_validate(File(**file_data)) for file_data in cached_files],
+                    )
+
+            # Query files ordered by timestamp descending (most recent first)
+            files = (
+                db.query(File)
+                .order_by(File.timestamp.desc())
+                .limit(limit)
+                .all()
+            )
+            
+            # Cache the result
+            if cache:
+                files_data = []
+                for file in files:
+                    file_dict = {
+                        "file_id": file.file_id,
+                        "filename": file.filename,
+                        "file_location": file.file_location,
+                        "user_id": str(file.user_id),
+                        "course_id": str(file.course_id) if file.course_id else None,
+                        "exam_type": file.exam_type,
+                        "info": file.info,
+                        "anonymous": file.anonymous,
+                        "timestamp": file.timestamp.isoformat() if file.timestamp else None
+                    }
+                    files_data.append(file_dict)
+                cache.set(cache_key, files_data, expire=300)  # Cache for 5 minutes
+            
+            return ResponseModel(
+                status=ResponseStatus.SUCCESS,
+                data=[FileResponseSchema.model_validate(file) for file in files],
+            )
+
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail='Failed to fetch recent uploads.')
+
+    def get_recent_uploads_by_user(self, db: Session, user_id: str, limit: int = 20, cache: CacheService = None) -> ResponseModel[List[FileResponseSchema]]:
+        """Get the most recent file uploads for a specific user sorted by timestamp."""
+        try:
+            # Try to get from cache first
+            cache_key = f"recent_uploads_user_{user_id}_{limit}"
+            if cache:
+                cached_files = cache.get(cache_key)
+                if cached_files:
+                    return ResponseModel(
+                        status=ResponseStatus.SUCCESS,
+                        data=[FileResponseSchema.model_validate(File(**file_data)) for file_data in cached_files],
+                    )
+
+            # Query files for specific user ordered by timestamp descending (most recent first)
+            files = (
+                db.query(File)
+                .filter(File.user_id == user_id)
+                .order_by(File.timestamp.desc())
+                .limit(limit)
+                .all()
+            )
+            
+            # Cache the result
+            if cache:
+                files_data = []
+                for file in files:
+                    file_dict = {
+                        "file_id": file.file_id,
+                        "filename": file.filename,
+                        "file_location": file.file_location,
+                        "user_id": str(file.user_id),
+                        "course_id": str(file.course_id) if file.course_id else None,
+                        "exam_type": file.exam_type,
+                        "info": file.info,
+                        "anonymous": file.anonymous,
+                        "timestamp": file.timestamp.isoformat() if file.timestamp else None
+                    }
+                    files_data.append(file_dict)
+                cache.set(cache_key, files_data, expire=300)  # Cache for 5 minutes
+            
+            return ResponseModel(
+                status=ResponseStatus.SUCCESS,
+                data=[FileResponseSchema.model_validate(file) for file in files],
+            )
+
+        except Exception as e:
+            print(e)
+            raise HTTPException(status_code=500, detail='Failed to fetch recent uploads for user.')

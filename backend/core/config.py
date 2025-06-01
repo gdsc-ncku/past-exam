@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     redis_port: int = 6379
     redis_password: str = ""
     redis_db: int = 0
+    
+    frontend_api_url: str
+    frontend_file_server_url: str
 
     class Config:
         env_file = '.env'

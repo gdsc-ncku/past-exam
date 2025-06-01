@@ -107,7 +107,7 @@ except Exception as e:
 # Database connection parameters
 user = os.getenv('POSTGRES_USER')
 password = os.getenv('POSTGRES_PASSWORD')
-host = 'localhost'
+host = os.getenv('POSTGRES_IP')
 port = os.getenv('POSTGRES_PORT')
 dbname = os.getenv('POSTGRES_DB')
 

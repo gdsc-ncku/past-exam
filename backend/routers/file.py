@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Cookie, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Cookie, Depends, File, Form, UploadFile, Query
 from sqlalchemy.orm import Session
 
 from crud.file import FileCRUD
@@ -15,6 +15,15 @@ router = APIRouter(tags=['file'], prefix='/api/v1/file')
 
 file_crud = FileCRUD()
 jwt_service = JWTService()
+
+
+@router.get('/recent', response_model=ResponseModel[List[FileResponseSchema]])
+async def get_recent_uploads(
+    limit: int = Query(default=20, ge=1, le=100, description="Number of recent files to retrieve (1-100)"),
+    db: Session = Depends(get_db)
+):
+    """Get the most recent file uploads across all users and courses."""
+    return file_crud.get_recent_uploads(db, limit)
 
 
 @router.get('', response_model=ResponseModel[List[FileResponseSchema]])
