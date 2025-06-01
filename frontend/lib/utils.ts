@@ -27,7 +27,7 @@ export const getAvatarUrl = (avatarPath: string, bustCache = false) => {
   } else {
     // Construct avatar URL using file server endpoint + avatar path
     const fileServerURL =
-      process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
+      process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'https://s3.ncku-pastexam.ccns.io';
     baseUrl = `${fileServerURL}${avatarPath}`;
   }
 
@@ -92,7 +92,7 @@ export const downloadFile = async (fileLocation: string, filename: string) => {
     } else {
       // Construct download URL using file server endpoint + file location
       const fileServerURL =
-        process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
+        process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'https://s3.ncku-pastexam.ccns.io';
       downloadUrl = `${fileServerURL}/exam-files/${fileLocation}`;
     }
 
@@ -135,7 +135,7 @@ export const downloadFile = async (fileLocation: string, filename: string) => {
         downloadUrl = fileLocation;
       } else {
         const fileServerURL =
-          process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
+          process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'https://s3.ncku-pastexam.ccns.io';
         downloadUrl = `${fileServerURL}/exam-files/${fileLocation}`;
       }
 

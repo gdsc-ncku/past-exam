@@ -370,8 +370,8 @@ function UploadForm() {
         setSelectedFile(null);
         setErrors({});
 
-        // Redirect to course page or files list
-        router.push(`/course/${formData.courseId}`);
+        // Redirect to course page removed - user stays on upload page
+        // router.push(`/course/${formData.courseId}`);
       } else {
         toast('上傳失敗，請稍後再試');
       }

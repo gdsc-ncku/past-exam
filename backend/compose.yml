@@ -89,8 +89,6 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     restart: always
-    depends_on:
-      - backend
     environment:
       - NEXT_PUBLIC_API_URL=https://api.ncku-pastexam.ccns.io
       - NEXT_PUBLIC_FILE_SERVER_URL=https://s3.ncku-pastexam.ccns.io

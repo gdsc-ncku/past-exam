@@ -75,7 +75,7 @@ const getFilePreviewUrl = (fileLocation: string) => {
   } else {
     // Construct URL using file server endpoint + file location
     const fileServerURL =
-      process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'http://localhost:9000';
+      process.env.NEXT_PUBLIC_FILE_SERVER_URL || 'https://s3.ncku-pastexam.ccns.io';
     return `${fileServerURL}/exam-files/${fileLocation}`;
   }
 };
