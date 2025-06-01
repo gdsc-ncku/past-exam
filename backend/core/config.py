@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     postgres_user: str
     postgres_password: str
     postgres_db: str
-    postgres_ip: str
+    postgres_host: str
     postgres_port: str
     google_redirect_uri: str
     google_client_id: str

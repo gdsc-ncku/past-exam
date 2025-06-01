@@ -7,7 +7,7 @@ from core.config import get_settings
 from models.comment import Comment
 from models.course import Course
 from models.file import File
-from models.user import User
+from models.user import User, user_bookmarks
 
 Base = declarative_base()
 
@@ -16,7 +16,7 @@ DATABASE_URL = URL.create(
     'postgresql',
     username=settings.postgres_user,
     password=settings.postgres_password,
-    host=settings.postgres_ip,
+    host=settings.postgres_host,
     port=settings.postgres_port,
     database=settings.postgres_db,
 )
@@ -38,7 +38,13 @@ def init_db() -> None:
         conn.execute(text('CREATE EXTENSION IF NOT EXISTS pg_trgm'))
         conn.commit()
 
-    # Create tables
     Base.metadata.create_all(
-        bind=engine, tables=[User.__table__, File.__table__, Comment.__table__, Course.__table__]
+        bind=engine, 
+        tables=[
+            User.__table__, 
+            File.__table__, 
+            Comment.__table__, 
+            Course.__table__,
+            user_bookmarks
+        ]
     )

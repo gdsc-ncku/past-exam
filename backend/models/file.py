@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import TYPE_CHECKING
 from enum import Enum
 
@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from .user import User
     from .course import Course
 
+# Define timezone offset
+TAIWAN_TZ = timezone(timedelta(hours=8))
 
 class ExamType(str, Enum):
     MIDTERM = "midterm"
@@ -26,7 +28,7 @@ class File(Base):
     file_id: Mapped[str] = mapped_column(String(255), primary_key=True)
     filename: Mapped[str] = mapped_column(String(255))
     file_location: Mapped[str] = mapped_column(String(500))
-    timestamp: Mapped[datetime] = mapped_column(default=datetime.now)
+    timestamp: Mapped[datetime] = mapped_column(default=lambda: datetime.now(TAIWAN_TZ))
     
     # New fields
     exam_type: Mapped[ExamType] = mapped_column(String(50), default=ExamType.OTHERS)
@@ -57,6 +59,7 @@ class File(Base):
         self.exam_type = exam_type
         self.info = info
         self.anonymous = anonymous
+        self.timestamp = datetime.now(TAIWAN_TZ)
 
     def __repr__(self):
         return f'File(filename={self.filename})'

@@ -1,5 +1,6 @@
 import os
 from typing import List, Optional
+from datetime import datetime, timezone, timedelta
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
@@ -82,6 +83,8 @@ class FileCRUD:
                     info=file_data.info,
                     anonymous=file_data.anonymous,
                 )
+
+                db_file.timestamp = datetime.now(TAIWAN_TZ)
 
                 db.add(db_file)
                 db.commit()
@@ -381,3 +384,46 @@ class FileCRUD:
         except Exception as e:
             print(e)
             raise HTTPException(status_code=500, detail='Failed to fetch recent uploads for user.')
+
+    def admin_delete_file(self, db: Session, file_id: str, admin_user_id: str, cache: CacheService = None) -> ResponseModel[None]:
+        """Admin-only file deletion - only specific admin user can delete any file"""
+        try:
+            # Check if user is the specific admin
+            ADMIN_USER_ID = "115261598260176932528"
+            if admin_user_id != ADMIN_USER_ID:
+                raise HTTPException(status_code=403, detail='Access denied. Admin privileges required.')
+
+            # Find file by ID (no user restriction for admin)
+            file = db.query(File).filter(File.file_id == file_id).first()
+            if not file:
+                raise HTTPException(status_code=404, detail=f'File with id {file_id} not found')
+
+            # Delete file from MinIO storage
+            try:
+                self.minio_service.delete_file(
+                    bucket_name=self.settings.minio_file_bucket, 
+                    object_name=file.file_location
+                )
+            except Exception as e:
+                print(f"Failed to delete file from storage: {e}")
+                # Continue with database deletion even if storage deletion fails
+
+            # Delete file record from database
+            db.delete(file)
+            db.commit()
+
+            # Invalidate related caches
+            if cache:
+                cache.invalidate_file_related_caches(file_id, str(file.user_id), str(file.course_id))
+
+            return ResponseModel(
+                status=ResponseStatus.SUCCESS,
+                message=f'File {file_id} deleted successfully by admin',
+                data=None,
+            )
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"Admin delete error: {e}")
+            raise HTTPException(status_code=500, detail='Failed to delete file.')

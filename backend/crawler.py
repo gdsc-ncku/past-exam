@@ -2,112 +2,22 @@ import os
 from urllib.parse import quote_plus
 
 import pandas as pd
-import requests
 from sqlalchemy import create_engine, text
 
-url = 'https://api.wavjaby.nckuctf.org/api/v0/historySearch?dept=ALL&semBegin=110-1&semEnd=113-2'
 df = pd.DataFrame()
-try:
-    response = requests.get(url)
-    data = response.json()
 
-    df = pd.DataFrame(data.get('data', []))
-    # Convert all columns to string type initially to prevent NaN interpretation
-    df = df.astype(str)
+with open('combined_courses_1130_1131.csv', 'r') as f:
+    df = pd.read_csv(
+        f, na_values=[], keep_default_na=False, dtype=str
+    )  # Read all as string initially
     # Replace 'nan' strings with actual NaN
     df = df.replace('nan', pd.NA)
-
-    # Rename columns to be more descriptive
-    column_mapping = {
-        'y': 'semester',
-        'dn': 'departmentId',
-        'sn': 'serialNumber',
-        'ca': 'attributeCode',
-        'sc': 'systemCode',
-        'g': 'forGrade',
-        'fc': 'forClass',
-        'fg': 'forClassGroup',
-        'ct': 'category',
-        'cn': 'courseName',
-        'ci': 'courseNote',
-        'cl': 'courseLimit',
-        'tg': 'tags',
-        'c': 'credits',
-        'r': 'required',
-        'i': 'instructors',
-        's': 'selected',
-        'a': 'available',
-        't': 'time',
-        'pe': 'preferenceEnter',
-        'cr': 'courseRegister',
-        'pr': 'preRegister',
-        'ar': 'addRequest',
-    }
-
-    # Rename columns
-    df = df.rename(columns=column_mapping)
-
-    # Convert data types
-    df['semester'] = df['semester'].astype(str)
-    df['departmentId'] = df['departmentId'].astype(str)
-    df['serialNumber'] = pd.to_numeric(df['serialNumber'], errors='coerce').astype('Int64')
-    df['attributeCode'] = df['attributeCode'].astype(str)
-    df['systemCode'] = df['systemCode'].astype(str)
-    df['forGrade'] = pd.to_numeric(df['forGrade'], errors='coerce')
-    df['forClass'] = df['forClass'].astype(str)
-    df['forClassGroup'] = df['forClassGroup'].astype(str)
-    df['category'] = df['category'].astype(str)
-    df['courseName'] = df['courseName'].astype(str)
-    df['courseNote'] = df['courseNote'].astype(str)
-    df['courseLimit'] = df['courseLimit'].astype(str)
-    df['credits'] = pd.to_numeric(df['credits'], errors='coerce')
-    df['required'] = df['required'].astype(bool)
-    df['selected'] = pd.to_numeric(df['selected'], errors='coerce')
-    df['available'] = pd.to_numeric(df['available'], errors='coerce')
-
-    # Print some basic information about the DataFrame
-    print(f'Total number of courses: {len(df)}')
-    print('\nColumns in the dataset:')
-    print(df.columns.tolist())
-    print('\nData types of columns:')
-    print(df.dtypes)
-    print('\nFirst few rows of the data:')
-    print(df.head())
-
-    # Print some basic statistics before dropping columns
-    print('\nBasic statistics:')
-    print(f"Number of departments: {df['departmentId'].nunique()}")
-    print(f"Number of instructors: {df['instructors'].explode().nunique()}")
-    print(f"Total credits offered: {df['credits'].sum()}")
-
-    # Drop less essential columns
-    columns_to_drop = [
-        'forClassGroup',  # Usually null
-        'courseLimit',  # Usually null
-        'selected',
-        'available',
-        'time',
-        'required',
-    ]
-
-    df = df.drop(columns=columns_to_drop)
-
-    csv_file_name = 'courses.csv'
-    df.to_csv(csv_file_name, index=False, encoding='utf-8')
-except Exception as e:
-    print(f'Error fetching data: {e} fallback to local file')
-    with open('courses.csv', 'r') as f:
-        df = pd.read_csv(
-            f, na_values=[], keep_default_na=False, dtype=str
-        )  # Read all as string initially
-        # Replace 'nan' strings with actual NaN
-        df = df.replace('nan', pd.NA)
 
 
 # Database connection parameters
 user = os.getenv('POSTGRES_USER')
 password = os.getenv('POSTGRES_PASSWORD')
-host = os.getenv('POSTGRES_IP')
+host = os.getenv('POSTGRES_HOST')
 port = os.getenv('POSTGRES_PORT')
 dbname = os.getenv('POSTGRES_DB')
 
@@ -122,6 +32,10 @@ engine = create_engine(
 # Convert list columns to string representation for database storage
 df['instructors'] = df['instructors'].apply(lambda x: ','.join(x) if isinstance(x, list) else x)
 df['tags'] = df['tags'].apply(lambda x: ','.join(x) if isinstance(x, list) else x)
+
+# Drop columns that don't exist in the database model
+columns_to_drop = ['forClassGroup', 'courseLimit', 'required', 'selected', 'available', 'time']
+df = df.drop(columns=[col for col in columns_to_drop if col in df.columns])
 
 # Drop rows with NaN serialNumber
 df = df.dropna(subset=['serialNumber'])
@@ -146,21 +60,18 @@ print('\nRows with duplicate course_id:')
 print(dup_courses)
 print(f'\nTotal rows with duplicate course_id: {len(dup_courses)}')
 
+# Drop duplicate course_id entries (keep the first occurrence)
+df = df.drop_duplicates(subset=['course_id'], keep='first')
+print(f'\nRows after dropping duplicates: {len(df)}')
+
 
 # Create table and insert data
 try:
-    # Drop existing table if it exists
-    with engine.connect() as conn:
-        conn.execute(text('DROP TABLE IF EXISTS courses'))
-        conn.commit()
 
     # Create new table and insert data
-    df.to_sql('courses', engine, if_exists='replace', index=False)
+    df.to_sql('courses', engine, if_exists='append', index=False)
 
-    # Add primary key constraint
-    with engine.connect() as conn:
-        conn.execute(text('ALTER TABLE courses ADD PRIMARY KEY ("course_id")'))
-        conn.commit()
+        
 
     # Print table information
     with engine.connect() as conn:

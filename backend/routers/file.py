@@ -10,6 +10,8 @@ from schemas.file import FileCreate as FileCreateSchema
 from schemas.file import FileResponse as FileResponseSchema
 from services.auth import JWTService
 from models.file import ExamType
+from core.dependencies import get_cache
+from services.cache import CacheService
 
 router = APIRouter(tags=['file'], prefix='/api/v1/file')
 
@@ -71,9 +73,36 @@ async def get_file(
     return file_crud.get_file_by_id(db, file_id)
 
 
+@router.delete('/admin/{file_id}', response_model=ResponseModel[None])
+async def admin_delete_file(
+    file_id: str, 
+    token: str | None = Cookie(default=None), 
+    db: Session = Depends(get_db),
+    cache: CacheService = Depends(get_cache)
+):
+    """Admin delete file - only specific admin user can delete any file"""
+    user = jwt_service.verify_token(token)
+    return file_crud.admin_delete_file(db, file_id, user['user_id'], cache)
+
+
 @router.delete('/{file_id}', response_model=ResponseModel[None])
 async def delete_file(
-    file_id: str, token: str | None = Cookie(default=None), db: Session = Depends(get_db)
+    file_id: str, 
+    token: str | None = Cookie(default=None), 
+    db: Session = Depends(get_db)
 ):
+    """Delete file - users can only delete their own files"""
     user = jwt_service.verify_token(token)
     return file_crud.delete_file(db, file_id, user['user_id'])
+
+
+@router.get('/admin/test')
+async def test_admin(token: str | None = Cookie(default=None)):
+    """Test admin access"""
+    user = jwt_service.verify_token(token)
+    ADMIN_USER_ID = "115261598260176932528"
+    
+    if user['user_id'] == ADMIN_USER_ID:
+        return {"message": "Admin access confirmed", "user_id": user['user_id']}
+    else:
+        return {"message": "Not admin", "user_id": user['user_id']}
