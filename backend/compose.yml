@@ -69,8 +69,8 @@ services:
       /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
       /usr/bin/mc mb myminio/${MINIO_FILE_BUCKET} --ignore-existing;
       /usr/bin/mc mb myminio/${MINIO_USER_AVATAR_BUCKET} --ignore-existing;
-      /usr/bin/mc anonymous set download myminio/${MINIO_FILE_BUCKET};
-      /usr/bin/mc anonymous set download myminio/${MINIO_USER_AVATAR_BUCKET};
+      /usr/bin/mc anonymous set public myminio/${MINIO_FILE_BUCKET};
+      /usr/bin/mc anonymous set public myminio/${MINIO_USER_AVATAR_BUCKET};
       exit 0;
       "
     networks:
@@ -92,7 +92,9 @@ services:
     depends_on:
       - postgres
       - minio
+      - createbuckets
       - redis
+      - nginx-proxy
     env_file:
       - .env
     environment:
@@ -101,7 +103,20 @@ services:
       - 8000:8000
     networks:
       - backend-network
-
+  frontend:
+    # image: ghcr.io/gdsc-ncku/pastexam/frontend:master
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=${FRONTEND_API_URL:-http://localhost:8000}
+      - NEXT_PUBLIC_FILE_SERVER_URL=${FRONTEND_FILE_SERVER_URL:-http://localhost:8000}
+    ports:
+      - 3000:3000
+    networks:
+      - backend-network
 networks:
   backend-network:
     driver: bridge
